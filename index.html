@@ -1,36 +1,440 @@
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  // Encabezados automáticos
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "Fecha y Hora", "Estudiante", "Documento", "Grupo", 
-      "SIM Ejecutante", "Rol Inicial",
-      "SIM-01", "SIM-02", "SIM-03", "SIM-04", "SIM-05", 
-      "SIM-06", "SIM-07", "SIM-08", "SIM-09"
-    ]);
-  }
-  
-  // Agrega la fila con el hallazgo incluido dentro de cada SIM
-  sheet.appendRow([
-    new Date().toLocaleString("es-CO"),
-    data.estudiante,
-    data.documento,
-    data.grupo,
-    data.simEjecutante,
-    data.rolInicial,
-    data.sims["SIM-01"] || "N/A",
-    data.sims["SIM-02"] || "N/A",
-    data.sims["SIM-03"] || "N/A",
-    data.sims["SIM-04"] || "N/A",
-    data.sims["SIM-05"] || "N/A",
-    data.sims["SIM-06"] || "N/A",
-    data.sims["SIM-07"] || "N/A",
-    data.sims["SIM-08"] || "N/A",
-    data.sims["SIM-09"] || "N/A"
-  ]);
-  
-  return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja Auditora - Simulación IDECO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+        }
+
+        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 16px 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            max-width: 650px;
+            width: 100%;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.25);
+        }
+
+        .header h1 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; }
+        .header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; font-weight: 400; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-main); }
+        input, select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+            border-radius: 8px; font-size: 0.9rem; transition: all 0.2s;
+            background-color: #fafafa;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary); background-color: #fff;
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* TABS DE NAVEGACIÓN SIM */
+        .tabs-container {
+            display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px;
+            margin-bottom: 16px; scrollbar-width: none;
+        }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: var(--card-bg); border: 1px solid var(--border);
+            padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            white-space: nowrap; cursor: pointer; color: var(--text-muted); transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3); }
+        .tab-btn.completed { border-color: var(--success); color: var(--success); background: var(--success-bg); }
+        .tab-btn.blocked { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
+
+        /* CRITERIOS DE AUDITORÍA */
+        .criterion-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+        }
+        .criterion-row:last-child { border-bottom: none; }
+        .criterion-label { font-size: 0.85rem; font-weight: 500; }
+
+        .btn-group { display: flex; gap: 6px; }
+        .opt-btn {
+            border: 1px solid var(--border); background: #f8fafc;
+            padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.8rem;
+            cursor: pointer; color: var(--text-muted); transition: all 0.15s;
+        }
+        .opt-btn.sel-ok { background: var(--success-bg); color: var(--success); border-color: #86efac; }
+        .opt-btn.sel-bad { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
+        .opt-btn.sel-neu { background: var(--warning-bg); color: var(--warning); border-color: #fde047; }
+
+        .btn-primary {
+            background: var(--primary); color: white; border: none; padding: 12px;
+            border-radius: 10px; font-weight: 600; width: 100%; font-size: 0.95rem;
+            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
+        }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #15803d; }
+
+        .blocked-card {
+            text-align: center; padding: 30px 15px; background: #f8fafc;
+            border: 2px dashed var(--border); border-radius: 12px;
+        }
+
+        .status-msg {
+            font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 8px; font-weight: 500;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>IDECO — LABORATORIO CLÍNICO</h1>
+        <p>Hoja Auditora de Simulación Interactiva</p>
+    </div>
+
+    <!-- PASO 1: REGISTRO INICIAL -->
+    <div id="step1" class="card">
+        <h2 style="font-size: 1.05rem; margin-top: 0; color: var(--primary-dark);">Datos de Registro</h2>
+        <div class="form-group">
+            <label for="estudiante">Nombre del Estudiante:</label>
+            <input type="text" id="estudiante" placeholder="Ej. Ana Martínez" required>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="documento">Documento / ID:</label>
+                <input type="text" id="documento" placeholder="Cédula" required>
+            </div>
+            <div class="form-group">
+                <label for="grupo">Grupo:</label>
+                <input type="text" id="grupo" value="Auxiliar Enfermería">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="simEjecutante">SIM en la que ejecutas:</label>
+                <select id="simEjecutante" required>
+                    <option value="">Seleccione...</option>
+                    <option value="SIM-01">SIM-01</option>
+                    <option value="SIM-02">SIM-02</option>
+                    <option value="SIM-03">SIM-03</option>
+                    <option value="SIM-04">SIM-04</option>
+                    <option value="SIM-05">SIM-05</option>
+                    <option value="SIM-06">SIM-06</option>
+                    <option value="SIM-07">SIM-07</option>
+                    <option value="SIM-08">SIM-08</option>
+                    <option value="SIM-09">SIM-09</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="rolInicial">Rol Asignado:</label>
+                <select id="rolInicial" required>
+                    <option value="Auxiliar / Ejecutor">Auxiliar / Ejecutor</option>
+                    <option value="Paciente">Paciente</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-primary" onclick="startAudit()">Comenzar Auditoría →</button>
+    </div>
+
+    <!-- PASO 2: ESTRUCTURA DE AUDITORÍA -->
+    <div id="step2" class="hidden">
+        <div class="tabs-container" id="tabsList"></div>
+
+        <div class="card" id="auditCard">
+            <div id="cardContent"></div>
+        </div>
+
+        <div class="card">
+            <button class="btn-primary btn-success" id="btnFinalSubmit" disabled onclick="submitFullAudit()">
+                💾 Enviar Evaluación Completa a Google Sheets
+            </button>
+            <div id="submitStatus" class="status-msg">
+                ⚠️ Completa la evaluación de todas las SIM para habilitar el envío.
+            </div>
+        </div>
+    </div>
+
+    <!-- PASO 3: CONFIRMACIÓN DE ENVÍO -->
+    <div id="step3" class="card hidden" style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+        <h2 style="color: var(--success); margin: 0 0 10px;">¡Auditoría Registrada!</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Tus evaluaciones han sido enviadas correctamente a la hoja de Google Sheets de IDECO.</p>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXDDSePSU1Yaucf-cJ_j95Yg973Puo-X4h0q9AU3q0sJoECSSH57tAeUHHjcxe--_e/exec";
+
+    const criteria = [
+        { id: "I", label: "Identificación" },
+        { id: "S", label: "Solicitud" },
+        { id: "E", label: "Examen" },
+        { id: "P", label: "Preparación" },
+        { id: "IR", label: "Información relevante" },
+        { id: "CE", label: "Condiciones especiales" },
+        { id: "C", label: "Comunicación" },
+        { id: "SE", label: "Seguridad" },
+        { id: "PM", label: "Puesto y materiales" },
+        { id: "DEC", label: "DECISIÓN GLOBAL", isDec: true }
+    ];
+
+    let activeSimIndex = 0;
+    const simsList = ["SIM-01","SIM-02","SIM-03","SIM-04","SIM-05","SIM-06","SIM-07","SIM-08","SIM-09"];
+    const simData = {};
+
+    function startAudit() {
+        const est = document.getElementById("estudiante").value;
+        const doc = document.getElementById("documento").value;
+        const simE = document.getElementById("simEjecutante").value;
+
+        if (!est || !doc || !simE) {
+            alert("Por favor complete sus datos e indique la SIM que ejecutará.");
+            return;
+        }
+
+        // Inicializar estructura limpia
+        simsList.forEach(sim => {
+            simData[sim] = { I:"", S:"", E:"", P:"", IR:"", CE:"", C:"", SE:"", PM:"", DEC:"", hallazgo:"" };
+        });
+
+        document.getElementById("step1").classList.add("hidden");
+        document.getElementById("step2").classList.remove("hidden");
+
+        renderTabs();
+        loadSimCard(0);
+        checkCompletion();
+    }
+
+    function renderTabs() {
+        const container = document.getElementById("tabsList");
+        container.innerHTML = "";
+        const blockedSim = document.getElementById("simEjecutante").value;
+
+        simsList.forEach((sim, idx) => {
+            const btn = document.createElement("button");
+            btn.className = `tab-btn ${idx === activeSimIndex ? 'active' : ''}`;
+            
+            if (sim === blockedSim) {
+                btn.classList.add("blocked");
+                btn.innerText = `${sim} (Tú)`;
+            } else {
+                if (isSimComplete(sim)) btn.classList.add("completed");
+                btn.innerText = sim;
+            }
+
+            btn.onclick = () => { saveCurrentHallazgo(); activeSimIndex = idx; renderTabs(); loadSimCard(idx); };
+            container.appendChild(btn);
+        });
+    }
+
+    function isSimComplete(sim) {
+        const d = simData[sim];
+        if (!d) return false;
+        return d.I && d.S && d.E && d.P && d.IR && d.CE && d.C && d.SE && d.PM && d.DEC;
+    }
+
+    function saveCurrentHallazgo() {
+        const currentSim = simsList[activeSimIndex];
+        const blockedSim = document.getElementById("simEjecutante").value;
+        if (currentSim !== blockedSim) {
+            const textarea = document.getElementById("hallazgoInput");
+            if (textarea) simData[currentSim].hallazgo = textarea.value;
+        }
+    }
+
+    function loadSimCard(index) {
+        const currentSim = simsList[index];
+        const blockedSim = document.getElementById("simEjecutante").value;
+        const content = document.getElementById("cardContent");
+
+        if (currentSim === blockedSim) {
+            content.innerHTML = `
+                <div class="blocked-card">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🎭</div>
+                    <h3 style="margin: 0 0 6px; color: var(--text-main);">Caso en Ejecución Activa</h3>
+                    <p style="margin: 0 0 15px; font-size: 0.85rem; color: var(--text-muted);">
+                        Participas como ejecutante/paciente en la <strong>${currentSim}</strong>. No realizas auditoría sobre ti mismo.
+                    </p>
+                    <button class="btn-primary" onclick="nextSim()">Ir a la Siguiente SIM →</button>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `<h3 style="margin-top:0; color:var(--primary-dark); display:flex; justify-content:space-between; align-items:center;">
+                        <span>Evaluación ${currentSim}</span>
+                        <span style="font-size:0.75rem; background:var(--primary-light); color:var(--primary-dark); padding:4px 8px; border-radius:12px;">Rol: Observador</span>
+                    </h3>`;
+
+        criteria.forEach(item => {
+            const opts = item.isDec ? ["C", "V", "Q", "D"] : ["✓", "X", "O"];
+            const currentVal = simData[currentSim][item.id];
+
+            html += `
+                <div class="criterion-row">
+                    <span class="criterion-label">${item.label}</span>
+                    <div class="btn-group">
+                        ${opts.map(o => {
+                            let activeClass = "";
+                            if (currentVal === o) {
+                                if (o === "✓" || o === "C") activeClass = "sel-ok";
+                                else if (o === "X" || o === "D") activeClass = "sel-bad";
+                                else activeClass = "sel-neu";
+                            }
+                            return `<button type="button" class="opt-btn ${activeClass}" onclick="selectCriterion('${currentSim}', '${item.id}', '${o}')">${o}</button>`;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        });
+
+        // CAJA DE HALLAZGO ESPECÍFICO POR SIM
+        html += `
+            <div class="form-group" style="margin-top: 15px;">
+                <label for="hallazgoInput">Hallazgo Principal / Aspecto Crítico (${currentSim}):</label>
+                <textarea id="hallazgoInput" rows="2" placeholder="Escriba el hallazgo o falla crítica observada en este caso..." onchange="saveCurrentHallazgo()">${simData[currentSim].hallazgo || ''}</textarea>
+            </div>
+            <button class="btn-primary" onclick="nextSim()">Guardar y Siguiente SIM →</button>
+        `;
+
+        content.innerHTML = html;
+    }
+
+    function selectCriterion(sim, critId, value) {
+        saveCurrentHallazgo();
+        simData[sim][critId] = value;
+        loadSimCard(activeSimIndex);
+        renderTabs();
+        checkCompletion();
+    }
+
+    function nextSim() {
+        saveCurrentHallazgo();
+        if (activeSimIndex < simsList.length - 1) {
+            activeSimIndex++;
+            renderTabs();
+            loadSimCard(activeSimIndex);
+        }
+    }
+
+    function checkCompletion() {
+        const blockedSim = document.getElementById("simEjecutante").value;
+        let allCompleted = true;
+
+        simsList.forEach(sim => {
+            if (sim !== blockedSim && !isSimComplete(sim)) {
+                allCompleted = false;
+            }
+        });
+
+        const btnSubmit = document.getElementById("btnFinalSubmit");
+        const statusMsg = document.getElementById("submitStatus");
+
+        if (allCompleted) {
+            btnSubmit.disabled = false;
+            statusMsg.innerText = "✅ ¡Has completado la evaluación de todas las SIM! Ya puedes enviar.";
+            statusMsg.style.color = "var(--success)";
+        } else {
+            btnSubmit.disabled = true;
+            statusMsg.innerText = "⚠️ Completa la evaluación de todas las SIM para habilitar el envío.";
+            statusMsg.style.color = "var(--text-muted)";
+        }
+    }
+
+    function submitFullAudit() {
+        saveCurrentHallazgo();
+        const btn = document.getElementById("btnFinalSubmit");
+        btn.disabled = true;
+        btn.innerText = "Enviando auditoría a Google Sheets...";
+
+        const blockedSim = document.getElementById("simEjecutante").value;
+        const formattedSims = {};
+
+        // Empaquetar criterios + hallazgo por SIM
+        simsList.forEach(sim => {
+            if (sim === blockedSim) {
+                formattedSims[sim] = "N/A (Rol Activo / Ejecutante)";
+            } else if (isSimComplete(sim)) {
+                const d = simData[sim];
+                const hallTxt = d.hallazgo ? ` | HALLAZGO: ${d.hallazgo}` : '';
+                formattedSims[sim] = `I(${d.I}), S(${d.S}), E(${d.E}), P(${d.P}), IR(${d.IR}), CE(${d.CE}), C(${d.C}), SE(${d.SE}), PM(${d.PM}) | DECISIÓN: ${d.DEC}${hallTxt}`;
+            } else {
+                formattedSims[sim] = "Incompleto";
+            }
+        });
+
+        const payload = {
+            estudiante: document.getElementById("estudiante").value,
+            documento: document.getElementById("documento").value,
+            grupo: document.getElementById("grupo").value,
+            simEjecutante: blockedSim,
+            rolInicial: document.getElementById("rolInicial").value,
+            sims: formattedSims
+        };
+
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            document.getElementById("step2").classList.add("hidden");
+            document.getElementById("step3").classList.remove("hidden");
+        })
+        .catch(err => {
+            alert("Error de conexión. Intente enviar nuevamente.");
+            btn.disabled = false;
+            btn.innerText = "💾 Enviar Evaluación Completa a Google Sheets";
+        });
+    }
+</script>
+</body>
+</html>
