@@ -343,7 +343,6 @@
             `;
         });
 
-        // Hallazgo individual guardado
         html += `
             <div class="form-group" style="margin-top: 15px;">
                 <label for="hallazgoInput">Hallazgo Principal / Aspecto Crítico (${currentSim}):</label>
@@ -403,24 +402,12 @@
         btn.innerText = "Enviando registros a Google Sheets...";
 
         const blockedSim = document.getElementById("simEjecutante").value;
-        const registros = [];
+        const cleanSimsData = {};
 
+        // Filtra solo las SIMs evaluadas correctamente como objeto
         simsList.forEach(sim => {
             if (sim !== blockedSim && isSimComplete(sim)) {
-                registros.push({
-                    sim: sim,
-                    I: simData[sim].I,
-                    S: simData[sim].S,
-                    E: simData[sim].E,
-                    P: simData[sim].P,
-                    IR: simData[sim].IR,
-                    CE: simData[sim].CE,
-                    C: simData[sim].C,
-                    SE: simData[sim].SE,
-                    PM: simData[sim].PM,
-                    DEC: simData[sim].DEC,
-                    hallazgo: simData[sim].hallazgo || ""
-                });
+                cleanSimsData[sim] = simData[sim];
             }
         });
 
@@ -431,8 +418,9 @@
             docente: document.getElementById("docente") ? document.getElementById("docente").value : "",
             simEjecutante: blockedSim,
             rolInicial: document.getElementById("rolInicial").value,
-            sims: simData // Envia los datos tabulares desglosados
+            sims: cleanSimsData
         };
+
         fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
