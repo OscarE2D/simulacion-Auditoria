@@ -212,7 +212,7 @@
 </div>
 
 <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXDDSePSU1Yaucf-cJ_j95Yg973Puo-X4h0q9AU3q0sJoECSSH57tAeUHHjcxe--_e/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyihm3fIh3CwNvOBz7j6WhVXAEwHtOJOimNSczC3jSZfXYttR1Hb0xNatLoDpYFw/exec";
 
     const criteria = [
         { id: "I", label: "Identificación" },
@@ -402,29 +402,60 @@
         btn.innerText = "Enviando registros a Google Sheets...";
 
         const blockedSim = document.getElementById("simEjecutante").value;
-        const cleanSimsData = {};
+        const estudiante = document.getElementById("estudiante").value || "";
+        const documento = document.getElementById("documento").value || "";
+        const grupo = document.getElementById("grupo").value || "";
+        const docente = document.getElementById("docente") ? document.getElementById("docente").value : "";
+        const rolInicial = document.getElementById("rolInicial").value || "";
 
-        // Filtra solo las SIMs evaluadas correctamente como objeto
+        const filasParaEnviar = [];
+
+        // Construye cada fila en un arreglo ordenado que coincide exactamente con las columnas de Google Sheets
         simsList.forEach(sim => {
-            if (sim !== blockedSim && isSimComplete(sim)) {
-                cleanSimsData[sim] = simData[sim];
+            if (sim === blockedSim) {
+                filasParaEnviar.push([
+                    estudiante,
+                    documento,
+                    grupo,
+                    docente,
+                    rolInicial,
+                    sim,
+                    "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A",
+                    "EJECUTANTE",
+                    "Rol activo en esta SIM"
+                ]);
+            } else if (isSimComplete(sim)) {
+                const d = simData[sim];
+                filasParaEnviar.push([
+                    estudiante,
+                    documento,
+                    grupo,
+                    docente,
+                    rolInicial,
+                    sim,
+                    d.I || "",
+                    d.S || "",
+                    d.E || "",
+                    d.P || "",
+                    d.IR || "",
+                    d.CE || "",
+                    d.C || "",
+                    d.SE || "",
+                    d.PM || "",
+                    d.DEC || "",
+                    d.hallazgo || ""
+                ]);
             }
         });
 
         const payload = {
-            estudiante: document.getElementById("estudiante").value,
-            documento: document.getElementById("documento").value,
-            grupo: document.getElementById("grupo").value,
-            docente: document.getElementById("docente") ? document.getElementById("docente").value : "",
-            simEjecutante: blockedSim,
-            rolInicial: document.getElementById("rolInicial").value,
-            sims: cleanSimsData
+            filas: filasParaEnviar
         };
 
         fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         })
         .then(() => {
