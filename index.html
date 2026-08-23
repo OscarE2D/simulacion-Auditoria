@@ -428,12 +428,11 @@
             estudiante: document.getElementById("estudiante").value,
             documento: document.getElementById("documento").value,
             grupo: document.getElementById("grupo").value,
-            docente: document.getElementById("docente").value,
+            docente: document.getElementById("docente") ? document.getElementById("docente").value : "",
             simEjecutante: blockedSim,
             rolInicial: document.getElementById("rolInicial").value,
-            registros: registros
+            sims: simData // Envia los datos tabulares desglosados
         };
-
         fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
