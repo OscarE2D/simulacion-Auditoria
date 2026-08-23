@@ -3,292 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoja Auditora - Simulación IDECO</title>
+    <title>Microbiología — Análisis Guiado de Casos Clínicos</title>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet"
-    >
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- jsPDF (generación de PDF con texto real, sin depender de captura de pantalla) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --primary: #0284c7;
-            --primary-dark: #0369a1;
-            --primary-light: #e0f2fe;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
+            --brand-primary: #0f172a;
+            --brand-accent: #0284c7;
+            --brand-emerald: #10b981;
+            --brand-warning: #f59e0b;
+            --brand-danger: #ef4444;
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --success: #16a34a;
-            --success-bg: #dcfce7;
-            --danger: #dc2626;
-            --danger-bg: #fee2e2;
-            --warning: #d97706;
-            --warning-bg: #fef3c7;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.15);
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-main);
             color: var(--text-main);
-            margin: 0;
-            padding: 16px 8px;
-            display: flex;
-            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
         }
 
         .app-container {
-            max-width: 650px;
-            width: 100%;
+            max-width: 950px;
+            margin: 0 auto;
         }
 
-        .header {
-            background: linear-gradient(
-                135deg,
-                #0284c7 0%,
-                #0369a1 100%
-            );
-            color: white;
-            padding: 20px;
-            border-radius: 16px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow:
-                0 10px 15px -3px rgba(2, 132, 199, 0.25);
+        /* HEADER PRINCIPAL */
+        .app-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 32px 28px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 1.25rem;
+        .app-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(2, 132, 199, 0.2);
+            border: 1px solid rgba(2, 132, 199, 0.4);
+            color: #38bdf8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 700;
-            letter-spacing: -0.025em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
-        .header p {
-            margin: 4px 0 0;
-            font-size: 0.85rem;
-            opacity: 0.9;
-            font-weight: 400;
+        .app-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
         }
 
+        .app-header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* VISTAS */
+        .view-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        .view-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CARDS */
         .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow:
-                0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            margin-bottom: 16px;
+            background: var(--surface);
             border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+        }
+
+        .section-header-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--brand-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
 
-        label {
+        .form-label {
             display: block;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
-            color: var(--text-main);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+            margin-bottom: 8px;
         }
 
-        input,
-        select,
-        textarea {
+        .form-input,
+        .form-textarea,
+        .form-select {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            color: var(--text-main);
             transition: all 0.2s;
-            background-color: #fafafa;
+            background: #f8fafc;
         }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
             outline: none;
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow:
-                0 0 0 3px var(--primary-light);
+            border-color: var(--brand-accent);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
         }
 
-        .grid-2 {
+        /* GRID */
+        .cases-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
         }
 
-        .tabs-container {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            margin-bottom: 16px;
-            scrollbar-width: none;
-        }
-
-        .tabs-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            white-space: nowrap;
+        .case-card {
+            background: #ffffff;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
             cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 130px;
+        }
+
+        .case-card:hover {
+            border-color: var(--brand-accent);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .case-card.selected {
+            border-color: var(--brand-emerald);
+            background: #f0fdf4;
+        }
+
+        .case-card .case-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--brand-primary);
+        }
+
+        .case-card .case-sub {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            transition: all 0.2s;
+            margin-top: 4px;
         }
 
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow:
-                0 2px 4px rgba(2, 132, 199, 0.3);
-        }
-
-        .tab-btn.completed {
-            border-color: var(--success);
-            color: var(--success);
-            background: var(--success-bg);
-        }
-
-        .tab-btn.blocked {
+        .case-card .status-tag {
+            align-self: flex-start;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 700;
             background: #f1f5f9;
-            color: #94a3b8;
-            border-color: #cbd5e1;
+            color: var(--text-muted);
         }
 
-        .criterion-row {
+        .case-card.selected .status-tag {
+            background: #dcfce7;
+            color: var(--brand-emerald);
+        }
+
+        /* BANNER */
+        .group-banner {
+            background: linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .criterion-row:last-child {
-            border-bottom: none;
-        }
-
-        .criterion-label {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 6px;
-        }
-
-        .opt-btn {
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
             border: 1px solid var(--border);
-            background: #f8fafc;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: all 0.15s;
         }
 
-        .opt-btn.sel-ok {
-            background: var(--success-bg);
-            color: var(--success);
-            border-color: #86efac;
-        }
-
-        .opt-btn.sel-bad {
-            background: var(--danger-bg);
-            color: var(--danger);
-            border-color: #fca5a5;
-        }
-
-        .opt-btn.sel-neu {
-            background: var(--warning-bg);
-            color: var(--warning);
-            border-color: #fde047;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            width: 100%;
+        /* SCENARIO */
+        .scenario-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 5px solid var(--brand-accent);
+            padding: 20px;
+            border-radius: var(--radius-md);
             font-size: 0.95rem;
+            line-height: 1.6;
+            color: #0c4a6e;
+            margin-bottom: 20px;
+        }
+
+        /* TABLAS */
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            margin-bottom: 20px;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .custom-table th {
+            background: #f8fafc;
+            color: var(--brand-primary);
+            font-weight: 700;
+        }
+
+        /* SECUENCIA */
+        .sequence-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .sequence-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+        }
+
+        .sequence-item select {
+            width: 80px;
+            padding: 6px;
+            font-weight: 700;
+        }
+
+        /* CONSOLIDACIÓN */
+        .fill-box {
+            background: #fffbeef5;
+            border: 1px solid #fde68a;
+            border-left: 4px solid var(--brand-warning);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #78350f;
+        }
+
+        .fill-input {
+            border: none;
+            border-bottom: 2px solid #b45309;
+            background: transparent;
+            padding: 2px 8px;
+            font-weight: 700;
+            color: #78350f;
+            outline: none;
+            width: 180px;
+            text-align: center;
+        }
+
+        /* BOTONES */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand-accent) 0%, #0369a1 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
             transition: all 0.2s;
-            box-shadow:
-                0 4px 6px -1px rgba(2, 132, 199, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
         }
 
         .btn-primary:disabled {
             background: #cbd5e1;
-            color: #94a3b8;
-            cursor: not-allowed;
             box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .btn-success {
-            background: var(--success);
-        }
-
-        .btn-success:hover {
-            background: #15803d;
-        }
-
-        .blocked-card {
-            text-align: center;
-            padding: 30px 15px;
-            background: #f8fafc;
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-        }
-
-        .status-msg {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 8px;
-            font-weight: 500;
-        }
-
-        .progress-box {
-            margin-bottom: 16px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 
@@ -296,259 +384,182 @@
 
 <div class="app-container">
 
-    <!-- ========================================================= -->
-    <!-- ENCABEZADO                                                -->
-    <!-- ========================================================= -->
+    <!-- HEADER GENERAL -->
+    <header class="app-header">
+        <div class="badge-tag">
+            <i class="fa-solid fa-microscope"></i>
+            Microbiología | Auxiliar de Enfermería
+        </div>
 
-    <div class="header">
-
-        <h1>
-            IDECO — LABORATORIO CLÍNICO
-        </h1>
+        <h1>Análisis Guiado de Casos Clínicos</h1>
 
         <p>
-            Hoja Auditora de Simulación Interactiva
+            Toma, Manejo y Bioseguridad de Muestras Microbiológicas (60 min)
         </p>
+    </header>
 
-    </div>
-
-
-    <!-- ========================================================= -->
-    <!-- PASO 1: DATOS GENERALES                                   -->
-    <!-- ========================================================= -->
-
-    <div
-        id="step1"
-        class="card"
-    >
-
-        <h2
-            style="
-                font-size:1.05rem;
-                margin-top:0;
-                color:var(--primary-dark);
-            "
-        >
-            Datos de Registro
-        </h2>
-
-
-        <div class="form-group">
-
-            <label for="estudiante">
-                Nombre del Estudiante:
-            </label>
-
-            <input
-                type="text"
-                id="estudiante"
-                placeholder="Ej. Oscar Eduardo Echenique Dominguez"
-                required
-            >
-
-        </div>
-
-
-        <div class="grid-2">
-
-            <div class="form-group">
-
-                <label for="documento">
-                    Documento / ID:
-                </label>
-
-                <input
-                    type="text"
-                    id="documento"
-                    placeholder="Cédula"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="grupo">
-                    Grupo:
-                </label>
-
-                <input
-                    type="text"
-                    id="grupo"
-                    value="Auxiliar Enfermería"
-                >
-
-            </div>
-
-        </div>
-
-
-        <div class="grid-2">
-
-            <div class="form-group">
-
-                <label for="docente">
-                    Docente / Evaluador:
-                </label>
-
-                <input
-                    type="text"
-                    id="docente"
-                    placeholder="Nombre del docente"
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="simEjecutante">
-                    SIM en la que ejecutas:
-                </label>
-
-                <select
-                    id="simEjecutante"
-                    required
-                >
-
-                    <option value="">
-                        Seleccione...
-                    </option>
-
-                    <option value="SIM-01">
-                        SIM-01
-                    </option>
-
-                    <option value="SIM-02">
-                        SIM-02
-                    </option>
-
-                    <option value="SIM-03">
-                        SIM-03
-                    </option>
-
-                    <option value="SIM-04">
-                        SIM-04
-                    </option>
-
-                    <option value="SIM-05">
-                        SIM-05
-                    </option>
-
-                    <option value="SIM-06">
-                        SIM-06
-                    </option>
-
-                    <option value="SIM-07">
-                        SIM-07
-                    </option>
-
-                    <option value="SIM-08">
-                        SIM-08
-                    </option>
-
-                    <option value="SIM-09">
-                        SIM-09
-                    </option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label for="rolInicial">
-                Rol Inicial:
-            </label>
-
-            <select
-                id="rolInicial"
-                required
-            >
-
-                <option value="Auxiliar / Ejecutor">
-                    Auxiliar / Ejecutor
-                </option>
-
-                <option value="Paciente">
-                    Paciente
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <button
-            class="btn-primary"
-            onclick="startAudit()"
-        >
-            Comenzar Auditoría →
-        </button>
-
-    </div>
-
-
-    <!-- ========================================================= -->
-    <!-- PASO 2: AUDITORÍA                                         -->
-    <!-- ========================================================= -->
-
-    <div
-        id="step2"
-        class="hidden"
-    >
-
-        <div
-            class="progress-box"
-            id="progressBox"
-        >
-            Preparando las 9 simulaciones...
-        </div>
-
-
-        <div
-            class="tabs-container"
-            id="tabsList"
-        ></div>
-
-
-        <div
-            class="card"
-            id="auditCard"
-        >
-
-            <div
-                id="cardContent"
-            ></div>
-
-        </div>
-
-
-        <!-- ===================================================== -->
-        <!-- ENVÍO                                                  -->
-        <!-- ===================================================== -->
+    <!-- VISTA 1 -->
+    <div id="view-registration" class="view-panel active">
 
         <div class="card">
 
-            <button
-                class="btn-primary btn-success"
-                id="btnFinalSubmit"
-                disabled
-                onclick="submitFullAudit()"
-            >
-                💾 Enviar Evaluación Completa a Google Sheets
-            </button>
+            <div class="section-header-title">
+                <i class="fa-solid fa-users" style="color: var(--brand-accent);"></i>
+                1. Registro del Equipo de Trabajo
+            </div>
 
+            <div class="form-group">
 
-            <div
-                id="submitStatus"
-                class="status-msg"
+                <label class="form-label" for="inputGroupNum">
+                    Número o Nombre del Grupo:
+                </label>
+
+                <input
+                    type="text"
+                    id="inputGroupNum"
+                    class="form-input"
+                    placeholder="Ej. Grupo N° 3"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Integrantes del Equipo (Nombre y Apellido):
+                </label>
+
+                <input
+                    type="text"
+                    id="member1"
+                    class="form-input"
+                    placeholder="Integrante 1"
+                    style="margin-bottom: 8px;"
+                >
+
+                <input
+                    type="text"
+                    id="member2"
+                    class="form-input"
+                    placeholder="Integrante 2"
+                    style="margin-bottom: 8px;"
+                >
+
+                <input
+                    type="text"
+                    id="member3"
+                    class="form-input"
+                    placeholder="Integrante 3"
+                    style="margin-bottom: 8px;"
+                >
+
+                <input
+                    type="text"
+                    id="member4"
+                    class="form-input"
+                    placeholder="Integrante 4"
+                >
+
+            </div>
+
+            <div class="section-header-title" style="margin-top: 28px;">
+
+                <i
+                    class="fa-solid fa-folder-open"
+                    style="color: var(--brand-accent);"
+                ></i>
+
+                2. Selecciona el Caso Asignado por el Docente
+
+            </div>
+
+            <p
+                style="
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                    margin-bottom: 12px;
+                "
             >
-                ⚠️ Completa las 8 SIM que debes auditar para habilitar el envío.
+                Cada equipo analizará un caso clínico principal y posteriormente
+                resolverá el Bloque Integrador de clase.
+            </p>
+
+            <div class="cases-grid">
+
+                <div
+                    class="case-card"
+                    id="case-card-1"
+                    onclick="selectCase(1)"
+                >
+                    <div>
+                        <div class="case-title">Caso 1</div>
+                        <div class="case-sub">Infección Respiratoria</div>
+                    </div>
+
+                    <div class="status-tag">
+                        Seleccionar
+                    </div>
+                </div>
+
+                <div
+                    class="case-card"
+                    id="case-card-2"
+                    onclick="selectCase(2)"
+                >
+                    <div>
+                        <div class="case-title">Caso 2</div>
+                        <div class="case-sub">Infección Urinaria</div>
+                    </div>
+
+                    <div class="status-tag">
+                        Seleccionar
+                    </div>
+                </div>
+
+                <div
+                    class="case-card"
+                    id="case-card-3"
+                    onclick="selectCase(3)"
+                >
+                    <div>
+                        <div class="case-title">Caso 3</div>
+                        <div class="case-sub">Infección Gastrointestinal</div>
+                    </div>
+
+                    <div class="status-tag">
+                        Seleccionar
+                    </div>
+                </div>
+
+                <div
+                    class="case-card"
+                    id="case-card-4"
+                    onclick="selectCase(4)"
+                >
+                    <div>
+                        <div class="case-title">Caso 4</div>
+                        <div class="case-sub">Infección Cutánea</div>
+                    </div>
+
+                    <div class="status-tag">
+                        Seleccionar
+                    </div>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 28px;">
+
+                <button
+                    id="btnStartActivity"
+                    class="btn-primary"
+                    disabled
+                    onclick="startActivity()"
+                >
+                    Iniciar Análisis del Caso
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
             </div>
 
         </div>
@@ -556,48 +567,250 @@
     </div>
 
 
-    <!-- ========================================================= -->
-    <!-- PASO 3: CONFIRMACIÓN                                      -->
-    <!-- ========================================================= -->
+    <!-- VISTA 2 -->
+    <div id="view-activity" class="view-panel">
 
-    <div
-        id="step3"
-        class="card hidden"
-        style="
-            text-align:center;
-            padding:40px 20px;
-        "
-    >
+        <div class="group-banner">
 
-        <div
-            style="
-                font-size:3rem;
-                margin-bottom:10px;
-            "
-        >
-            🎉
+            <div>
+
+                <span
+                    style="
+                        font-size: 0.75rem;
+                        font-weight: 800;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                    "
+                    id="displayGroupTitle"
+                >
+                    Grupo
+                </span>
+
+                <h3
+                    id="displayMembers"
+                    style="
+                        color: var(--brand-primary);
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                    "
+                >
+                    -
+                </h3>
+
+            </div>
+
+            <div>
+
+                <span
+                    class="badge-tag"
+                    id="displayCaseTag"
+                >
+                    Caso -
+                </span>
+
+            </div>
+
         </div>
 
 
-        <h2
-            style="
-                color:var(--success);
-                margin:0 0 10px;
-            "
-        >
-            ¡Auditoría Registrada!
-        </h2>
+        <!-- PARTE I -->
+
+        <div class="card">
+
+            <div class="section-header-title">
+
+                <i
+                    class="fa-solid fa-notes-medical"
+                    style="color: var(--brand-accent);"
+                ></i>
+
+                PARTE I: Análisis del Caso Asignado
+
+            </div>
+
+            <div id="caseDynamicContent"></div>
+
+        </div>
 
 
-        <p
-            style="
-                color:var(--text-muted);
-                font-size:0.9rem;
-            "
-        >
-            Las 9 simulaciones fueron guardadas
-            correctamente en Google Sheets.
-        </p>
+        <!-- PARTE II -->
+
+        <div class="card">
+
+            <div class="section-header-title">
+
+                <i
+                    class="fa-solid fa-layer-group"
+                    style="color: var(--brand-emerald);"
+                ></i>
+
+                PARTE II: Integración y Cierre General de Clase
+
+            </div>
+
+            <p
+                style="
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                    margin-bottom: 16px;
+                "
+            >
+                <em>
+                    Esta sección es de carácter obligatorio para todos los grupos
+                    de la clase.
+                </em>
+            </p>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    1. Cadena de Valor Preanalítica
+                    (Ordenamiento de Pasos del 1 al 7)
+                </label>
+
+                <p
+                    style="
+                        font-size: 0.85rem;
+                        color: var(--text-muted);
+                        margin-bottom: 12px;
+                    "
+                >
+                    Asigne el número de orden (1 a 7) que corresponde a cada
+                    paso para reconstruir la secuencia correcta:
+                </p>
+
+                <div
+                    class="sequence-list"
+                    id="sequenceContainer"
+                ></div>
+
+            </div>
+
+
+            <div
+                class="form-group"
+                style="margin-top: 24px;"
+            >
+
+                <label
+                    class="form-label"
+                    for="inputGrandConclusion"
+                >
+                    2. Gran Conclusión de Aula:
+                </label>
+
+                <p
+                    style="
+                        font-size: 0.85rem;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                    "
+                >
+                    En sus palabras: ¿Qué hace que una toma de muestra sea
+                    un procedimiento técnico bien hecho y no un simple trámite?
+                </p>
+
+                <textarea
+                    id="inputGrandConclusion"
+                    class="form-textarea"
+                    placeholder="Escriba aquí la conclusión consensuada del grupo..."
+                ></textarea>
+
+            </div>
+
+
+            <div
+                class="form-group"
+                style="margin-top: 24px;"
+            >
+
+                <label class="form-label">
+                    3. Verificación de Premisa Fundamental
+                    (Falso o Verdadero):
+                </label>
+
+                <div
+                    style="
+                        background: #f8fafc;
+                        border: 1px solid var(--border);
+                        padding: 16px;
+                        border-radius: var(--radius-md);
+                        margin-top: 8px;
+                    "
+                >
+
+                    <p
+                        style="
+                            font-size: 0.9rem;
+                            color: #334155;
+                            margin-bottom: 12px;
+                            line-height: 1.5;
+                        "
+                    >
+                        <em>
+                            "Una muestra microbiológica ÚTIL y SEGURA requiere que:
+                            Sea seleccionada según el sitio anatómico real de la
+                            infección, se obtenga mediante técnica aséptica adecuada
+                            a la condición del paciente, conserve su identidad e
+                            integridad sin demoras en el transporte, y se manipule
+                            bajo estrictas medidas de bioseguridad para proteger al
+                            personal y al espécimen."
+                        </em>
+                    </p>
+
+                    <div style="display: flex; gap: 20px;">
+
+                        <label
+                            style="
+                                font-weight: 700;
+                                cursor: pointer;
+                                color: var(--brand-primary);
+                            "
+                        >
+                            <input
+                                type="radio"
+                                name="vf_option"
+                                value="FALSO"
+                            >
+                            FALSO
+                        </label>
+
+                        <label
+                            style="
+                                font-weight: 700;
+                                cursor: pointer;
+                                color: var(--brand-emerald);
+                            "
+                        >
+                            <input
+                                type="radio"
+                                name="vf_option"
+                                value="VERDADERO"
+                            >
+                            VERDADERO
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div style="margin-top: 28px;">
+
+                <button
+                    class="btn-primary"
+                    onclick="submitWork()"
+                >
+                    Finalizar y Generar PDF de la Actividad
+                    <i class="fa-solid fa-file-pdf"></i>
+                </button>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -606,1419 +819,1142 @@
 
 <script>
 
-    /*
-    ================================================================
-    CONFIGURACIÓN GOOGLE APPS SCRIPT
-    ================================================================
-    */
+    /* ============================================================
+       DATOS
+    ============================================================ */
 
-    const SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbwyihm3fIh3CwNvOBz7j6WhVXAEwHtOJOimNSczC3jSZfXYttR1Hb0xNatLoDpYFw/exec";
+    const CASES_DATA = {
+
+        1: {
+            title: "CASO 1 — INFECCIÓN RESPIRATORIA",
+            focus: "Selección y Representatividad de la Muestra",
+
+            scenario:
+                "Un paciente adulto consulta por fiebre, tos productiva, dolor torácico y dificultad respiratoria. Por sus manifestaciones clínicas se sospecha una infección de las vías respiratorias inferiores y se solicita un estudio microbiológico. Durante la atención, se recibe un recipiente con material para el estudio, el cual está constituido principalmente por <strong>saliva</strong>.",
+
+            questions: [
+                {
+                    id: "q1_1",
+                    text:
+                        "1. Identificación de la necesidad clínica: ¿Qué sitio anatómico específico necesitamos investigar en este paciente y cuál sería el espécimen ideal para dicho sitio?"
+                },
+                {
+                    id: "q1_2",
+                    text:
+                        "2. Análisis de la muestra recibida: El material recibido proviene de la boca (saliva). ¿Por qué no podemos asumirlo como una muestra adecuada para estudiar las vías respiratorias inferiores?"
+                },
+                {
+                    id: "q1_3",
+                    text:
+                        "3. Concepto clave (Representatividad): ¿Qué condición debe cumplir una muestra para ser considerada representativa del proceso infeccioso?"
+                },
+                {
+                    id: "q1_4",
+                    text:
+                        "4. Consecuencia microbiológica: Si procesamos una muestra rica en saliva y microbiota oral en lugar de secreción profunda, ¿qué problema de interpretación se genera en el laboratorio?"
+                }
+            ],
+
+            decisionPrompt:
+                "¿Aceptamos o rechazamos la muestra salival para el estudio de vías respiratorias inferiores? Justifiquen su respuesta técnica:",
+
+            hasTable: false,
+
+            consolidationText:
+                'Para seleccionar una muestra microbiológica adecuada, no basta con saber la enfermedad; debemos verificar que el espécimen sea <input type="text" class="fill-input" id="fill_1" placeholder="palabra clave"> del sitio anatómico que queremos investigar.'
+        },
 
 
-    /*
-    ================================================================
-    CRITERIOS DE AUDITORÍA
-    ================================================================
-    */
+        2: {
+            title: "CASO 2 — INFECCIÓN URINARIA",
+            focus: "Obtención de la Muestra y Prevención de Contaminación",
 
-    const criteria = [
+            scenario:
+                "<strong>Paciente A:</strong> Mujer de 35 años con disuria, polaquiuria y dolor suprapúbico. Se solicita urocultivo (micción espontánea).<br><strong>Paciente B:</strong> Paciente con los mismos síntomas, pero portador de un catéter urinario permanente (sonda vesical).",
+
+            questions: [
+                {
+                    id: "q2_1",
+                    text:
+                        "1. Verificación previa: Antes de tomar la muestra en cualquiera de los dos pacientes, ¿qué verificaciones iniciales (paciente, solicitud, insumos) debemos realizar obligatoriamente?"
+                },
+                {
+                    id: "q2_2",
+                    text:
+                        "2. Control de contaminación en Paciente A: En la micción espontánea, ¿qué instrucciones de preparación e higiene de la paciente son críticas para evitar la contaminación por flora genital?"
+                },
+                {
+                    id: "q2_3",
+                    text:
+                        "3. Técnica de obtención en Paciente B: En el paciente con sonda vesical, ¿de dónde y cómo debemos tomar la muestra para urocultivo? ¿Por qué está contraindicado tomarla de la bolsa recolectora?"
+                }
+            ],
+
+            hasTable: true,
+
+            tableHeaders: [
+                "Condición del Paciente",
+                "Sitio / Puerto de Obtención",
+                "Riesgo Principal de Contaminación"
+            ],
+
+            tableRows: [
+                {
+                    col1: "Paciente A (Micción espontánea)",
+                    id2: "c2_pA_sitio",
+                    id3: "c2_pA_riesgo"
+                },
+                {
+                    col1: "Paciente B (Catéter permanente)",
+                    id2: "c2_pB_sitio",
+                    id3: "c2_pB_riesgo"
+                }
+            ],
+
+            consolidationText:
+                'Una muestra correcta no depende solo del tipo de espécimen (orina), sino de adecuar la (o el) <input type="text" class="fill-input" id="fill_2a" placeholder="técnica / método"> de obtención a la condición particular del paciente para evitar la <input type="text" class="fill-input" id="fill_2b" placeholder="efecto no deseado">.'
+        },
+
+
+        3: {
+            title: "CASO 3 — INFECCIÓN GASTROINTESTINAL",
+            focus: "Identificación, Trazabilidad, Conservación y Transporte",
+
+            scenario:
+                "Un paciente consulta por diarrea aguda y fiebre. Se solicita coprocultivo. La muestra de materia fecal es recolectada en recipiente adecuado. Sin embargo, ocurren tres anomalías:<br>1. La etiqueta del recipiente no coincide exactamente con la solicitud médica.<br>2. El recipiente queda en mesa de trabajo a temperatura ambiente durante más de 6 horas.<br>3. No se utilizó medio de transporte para conservar los patógenos entéricos.",
+
+            questions: [
+                {
+                    id: "q3_1",
+                    text:
+                        "1. Trazabilidad: ¿Por qué una inconsistencia entre los datos del recipiente y la solicitud médica invalida el procesamiento de la muestra?"
+                },
+                {
+                    id: "q3_2",
+                    text:
+                        "2. Integridad y Conservación: ¿Qué le sucede a los microorganismos patógenos y a la microbiota acompañante cuando la muestra fecal permanece horas a temperatura ambiente sin conservación?"
+                },
+                {
+                    id: "q3_3",
+                    text:
+                        "3. El rol del Transporte: ¿Por qué el transporte se considera parte crítica de la fase preanalítica y no un simple traslado físico?"
+                }
+            ],
+
+            decisionPrompt:
+                "Decisión del Grupo: Identifiquen en qué momento específico del recorrido de la muestra se perdió la calidad preanalítica y qué medida correctiva correspondía aplicar:",
+
+            hasTable: false,
+
+            consolidationText:
+                'Una muestra correctamente obtenida pierde su utilidad diagnóstica si se interrumpe la <input type="text" class="fill-input" id="fill_3a" placeholder="condición 1"> del paciente o si fallan las condiciones de <input type="text" class="fill-input" id="fill_3b" placeholder="condición 2"> y <input type="text" class="fill-input" id="fill_3c" placeholder="condición 3"> durante el traslado.'
+        },
+
+
+        4: {
+            title: "CASO 4 — INFECCIÓN CUTÁNEA",
+            focus: "Calidad del Espécimen y Bioseguridad en la Toma",
+
+            scenario:
+                "Un paciente hospitalizado presenta una herida quirúrgica en la pierna con eritema, secreción purulenta profunda y dolor. La auxiliar de enfermería realiza la toma de muestra frotando un hisopo únicamente en la piel superficial alrededor de la herida. Utiliza guantes. Al cerrar el recipiente de forma apresurada, este gotea y derrama secreción sobre la gradilla de transporte durante el traslado.",
+
+            questions: [
+                {
+                    id: "q4_1",
+                    text:
+                        "1. Evaluación de la Muestra (Representatividad): ¿Por qué el hisopado superficial de piel no representa el proceso infeccioso profundo de la herida? ¿Qué material se debió aspirar/tomar?"
+                },
+                {
+                    id: "q4_2",
+                    text:
+                        "2. Evaluación de Bioseguridad (Riesgo y Protección): ¿El uso de guantes reemplaza la higiene de manos antes y después del procedimiento? Justifiquen. ¿Qué otro EPP era necesario?"
+                },
+                {
+                    id: "q4_3",
+                    text:
+                        "3. Manejo del Incidente (Contención): Ante el derrame y fuga de la muestra en el contenedor de traslado, ¿cuáles son los dos aspectos que se vieron comprometidos simultáneamente?"
+                }
+            ],
+
+            hasTable: true,
+
+            tableHeaders: [
+                "Dimensión",
+                "Problema Detectado en el Caso",
+                "Acción Correctiva Requerida"
+            ],
+
+            tableRows: [
+                {
+                    col1: "Calidad de la Muestra",
+                    id2: "c4_cal_prob",
+                    id3: "c4_cal_acc"
+                },
+                {
+                    col1: "Bioseguridad e Integridad",
+                    id2: "c4_bio_prob",
+                    id3: "c4_bio_acc"
+                }
+            ],
+
+            consolidationText:
+                'El procedimiento de toma de muestra debe garantizar de forma simultánea la <input type="text" class="fill-input" id="fill_4a" placeholder="condición espécimen"> del espécimen y la <input type="text" class="fill-input" id="fill_4b" placeholder="condición personal"> del personal de salud mediante el control de riesgos biológicos.'
+        }
+
+    };
+
+
+    /* ============================================================
+       CADENA PREANALÍTICA
+    ============================================================ */
+
+    const SEQUENCE_ITEMS = [
 
         {
-            id: "I",
-            label: "Identificación"
+            code: "A",
+            name: "A. Obtención Aséptica"
         },
 
         {
-            id: "S",
-            label: "Solicitud"
+            code: "B",
+            name: "B. Trazabilidad e Identificación"
         },
 
         {
-            id: "E",
-            label: "Examen"
+            code: "C",
+            name: "C. Sitio Anatómico"
         },
 
         {
-            id: "P",
-            label: "Preparación"
+            code: "D",
+            name: "D. Conservación y Transporte"
         },
 
         {
-            id: "IR",
-            label: "Información relevante"
+            code: "E",
+            name: "E. Verificar Representatividad"
         },
 
         {
-            id: "CE",
-            label: "Condiciones especiales"
+            code: "F",
+            name: "F. Bioseguridad"
         },
 
         {
-            id: "C",
-            label: "Comunicación"
-        },
-
-        {
-            id: "SE",
-            label: "Seguridad"
-        },
-
-        {
-            id: "PM",
-            label: "Puesto y materiales"
-        },
-
-        {
-            id: "DEC",
-            label: "Decisión Global",
-            isDec: true
+            code: "G",
+            name: "G. Seleccionar Espécimen"
         }
 
     ];
 
 
-    /*
-    ================================================================
-    LAS 9 SIMULACIONES
-    ================================================================
-    */
+    /* ============================================================
+       ESTADO
+    ============================================================ */
 
-    const simsList = [
+    let selectedCaseId = null;
 
-        "SIM-01",
-        "SIM-02",
-        "SIM-03",
-        "SIM-04",
-        "SIM-05",
-        "SIM-06",
-        "SIM-07",
-        "SIM-08",
-        "SIM-09"
-
-    ];
+    let groupData = {
+        number: "",
+        members: []
+    };
 
 
-    /*
-    ================================================================
-    ESTADO
-    ================================================================
-    */
+    /* ============================================================
+       SELECCIÓN DE CASO
+    ============================================================ */
 
-    let activeSimIndex = 0;
+    function selectCase(caseId) {
 
-    const simData = {};
-
-
-    /*
-    ================================================================
-    INICIAR AUDITORÍA
-    ================================================================
-    */
-
-    function startAudit() {
-
-        const estudiante =
-            document
-                .getElementById("estudiante")
-                .value
-                .trim();
-
-
-        const documento =
-            document
-                .getElementById("documento")
-                .value
-                .trim();
-
-
-        const simEjecutante =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        if (
-            !estudiante ||
-            !documento ||
-            !simEjecutante
-        ) {
-
-            alert(
-                "Por favor ingrese Nombre, Documento y SIM."
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ------------------------------------------------------------
-        Inicializar las 9 SIM.
-        ------------------------------------------------------------
-        */
-
-        simsList.forEach(sim => {
-
-            simData[sim] = {
-
-                I: "",
-                S: "",
-                E: "",
-                P: "",
-                IR: "",
-                CE: "",
-                C: "",
-                SE: "",
-                PM: "",
-                DEC: "",
-                hallazgo: ""
-
-            };
-
-        });
-
-
-        /*
-        ------------------------------------------------------------
-        Cambiar pantalla.
-        ------------------------------------------------------------
-        */
+        selectedCaseId = caseId;
 
         document
-            .getElementById("step1")
-            .classList.add("hidden");
-
+            .querySelectorAll('.case-card')
+            .forEach(c => c.classList.remove('selected'));
 
         document
-            .getElementById("step2")
-            .classList.remove("hidden");
+            .getElementById(`case-card-${caseId}`)
+            .classList.add('selected');
 
-
-        activeSimIndex = 0;
-
-
-        actualizarProgreso();
-
-        renderTabs();
-
-        loadSimCard(0);
-
-        checkCompletion();
-
+        checkRegistrationForm();
     }
 
 
-    /*
-    ================================================================
-    ACTUALIZAR PROGRESO
-    ================================================================
-    */
+    /* ============================================================
+       VALIDACIÓN REGISTRO
+    ============================================================ */
 
-    function actualizarProgreso() {
+    function checkRegistrationForm() {
 
-        const blockedSim =
+        const groupNum =
             document
-                .getElementById("simEjecutante")
-                .value;
+                .getElementById('inputGroupNum')
+                .value
+                .trim();
+
+        const btn =
+            document.getElementById('btnStartActivity');
+
+        btn.disabled = !(groupNum && selectedCaseId);
+    }
 
 
-        let completadas = 0;
+    document
+        .getElementById('inputGroupNum')
+        .addEventListener('input', checkRegistrationForm);
 
 
-        simsList.forEach(sim => {
+    /* ============================================================
+       INICIO DE ACTIVIDAD
+    ============================================================ */
 
-            if (
-                sim !== blockedSim &&
-                isSimComplete(sim)
-            ) {
+    function startActivity() {
 
-                completadas++;
+        groupData.number =
+            document
+                .getElementById('inputGroupNum')
+                .value
+                .trim();
 
-            }
+        groupData.members = [
 
-        });
+            document.getElementById('member1').value.trim(),
 
+            document.getElementById('member2').value.trim(),
 
-        const totalAuditar =
-            simsList.length - 1;
+            document.getElementById('member3').value.trim(),
+
+            document.getElementById('member4').value.trim()
+
+        ].filter(m => m !== "");
 
 
         document
-            .getElementById("progressBox")
+            .getElementById('displayGroupTitle')
+            .innerText = groupData.number;
+
+
+        document
+            .getElementById('displayMembers')
             .innerText =
-                `Progreso de auditoría: ${completadas} de ${totalAuditar} SIM completadas`;
+                "Integrantes: " +
+                (
+                    groupData.members.join(', ') ||
+                    "No especificados"
+                );
+
+
+        document
+            .getElementById('displayCaseTag')
+            .innerText =
+                `Caso Clínico Asignado: N° ${selectedCaseId}`;
+
+
+        renderCaseContent(selectedCaseId);
+
+        renderSequenceList();
+
+
+        document
+            .getElementById('view-registration')
+            .classList.remove('active');
+
+
+        document
+            .getElementById('view-activity')
+            .classList.add('active');
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
 
     }
 
 
-    /*
-    ================================================================
-    CREAR PESTAÑAS
-    ================================================================
-    */
+    /* ============================================================
+       RENDER CASO
+    ============================================================ */
 
-    function renderTabs() {
+    function renderCaseContent(caseId) {
+
+        const data = CASES_DATA[caseId];
 
         const container =
-            document.getElementById("tabsList");
+            document.getElementById('caseDynamicContent');
 
+        let html = '';
 
-        container.innerHTML = "";
 
-
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        simsList.forEach(
-            (sim, index) => {
-
-                const btn =
-                    document.createElement("button");
-
-
-                btn.className =
-                    `tab-btn ${
-                        index === activeSimIndex
-                            ? "active"
-                            : ""
-                    }`;
-
-
-                /*
-                ----------------------------------------------------
-                SIM ejecutante
-                ----------------------------------------------------
-                */
-
-                if (
-                    sim === blockedSim
-                ) {
-
-                    btn.classList.add("blocked");
-
-                    btn.innerText =
-                        `${sim} (Tú)`;
-
-                }
-
-                /*
-                ----------------------------------------------------
-                SIM auditables
-                ----------------------------------------------------
-                */
-
-                else {
-
-                    if (
-                        isSimComplete(sim)
-                    ) {
-
-                        btn.classList.add(
-                            "completed"
-                        );
-
-                    }
-
-                    btn.innerText = sim;
-
-                }
-
-
-                btn.onclick = () => {
-
-                    saveCurrentHallazgo();
-
-                    activeSimIndex =
-                        index;
-
-                    renderTabs();
-
-                    loadSimCard(
-                        activeSimIndex
-                    );
-
-                };
-
-
-                container.appendChild(btn);
-
-            }
-        );
-
-    }
-
-
-    /*
-    ================================================================
-    COMPROBAR SI UNA SIM ESTÁ COMPLETA
-    ================================================================
-    */
-
-    function isSimComplete(sim) {
-
-        const d =
-            simData[sim];
-
-
-        if (!d) {
-
-            return false;
-
-        }
-
-
-        return Boolean(
-
-            d.I &&
-            d.S &&
-            d.E &&
-            d.P &&
-            d.IR &&
-            d.CE &&
-            d.C &&
-            d.SE &&
-            d.PM &&
-            d.DEC
-
-        );
-
-    }
-
-
-    /*
-    ================================================================
-    GUARDAR HALLAZGO ACTUAL
-    ================================================================
-    */
-
-    function saveCurrentHallazgo() {
-
-        const currentSim =
-            simsList[activeSimIndex];
-
-
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        if (
-            currentSim === blockedSim
-        ) {
-
-            return;
-
-        }
-
-
-        const textarea =
-            document.getElementById(
-                "hallazgoInput"
-            );
-
-
-        if (textarea) {
-
-            simData[currentSim].hallazgo =
-                textarea.value;
-
-        }
-
-    }
-
-
-    /*
-    ================================================================
-    CARGAR TARJETA DE SIM
-    ================================================================
-    */
-
-    function loadSimCard(index) {
-
-        const currentSim =
-            simsList[index];
-
-
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        const content =
-            document.getElementById(
-                "cardContent"
-            );
-
-
-        /*
-        ------------------------------------------------------------
-        SIM EJECUTANTE
-        ------------------------------------------------------------
-        */
-
-        if (
-            currentSim === blockedSim
-        ) {
-
-            content.innerHTML = `
-
-                <div class="blocked-card">
-
-                    <div
-                        style="
-                            font-size:2rem;
-                            margin-bottom:8px;
-                        "
-                    >
-                        🎭
-                    </div>
-
-
-                    <h3
-                        style="
-                            margin:0 0 6px;
-                            color:var(--text-main);
-                        "
-                    >
-                        Caso en Ejecución Activa
-                    </h3>
-
-
-                    <p
-                        style="
-                            margin:0 0 15px;
-                            font-size:0.85rem;
-                            color:var(--text-muted);
-                        "
-                    >
-                        Actúas como ejecutante/paciente
-                        en la
-                        <strong>${currentSim}</strong>.
-                        No realizas auditoría en este caso.
-                    </p>
-
-
-                    <button
-                        class="btn-primary"
-                        onclick="nextSim()"
-                    >
-                        Ir a la Siguiente SIM →
-                    </button>
-
-                </div>
-
-            `;
-
-
-            return;
-
-        }
-
-
-        /*
-        ------------------------------------------------------------
-        SIM AUDITADA
-        ------------------------------------------------------------
-        */
-
-        const d =
-            simData[currentSim];
-
-
-        let html = `
-
+        html += `
             <h3
                 style="
-                    margin-top:0;
-                    color:var(--primary-dark);
-                    display:flex;
-                    justify-content:space-between;
-                    align-items:center;
+                    color: var(--brand-primary);
+                    margin-bottom: 4px;
                 "
             >
-
-                <span>
-                    Evaluación ${currentSim}
-                </span>
-
-
-                <span
-                    style="
-                        font-size:0.75rem;
-                        background:var(--primary-light);
-                        color:var(--primary-dark);
-                        padding:4px 8px;
-                        border-radius:12px;
-                    "
-                >
-                    Rol: Observador
-                </span>
-
+                ${data.title}
             </h3>
 
+            <div
+                style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--brand-accent);
+                    text-transform: uppercase;
+                    margin-bottom: 16px;
+                "
+            >
+                Enfoque: ${data.focus}
+            </div>
         `;
 
 
-        /*
-        ------------------------------------------------------------
-        CRITERIOS
-        ------------------------------------------------------------
-        */
-
-        criteria.forEach(item => {
-
-            const options =
-                item.isDec
-                    ? ["C", "V", "Q", "D"]
-                    : ["✓", "X", "O"];
+        html += `
+            <div class="scenario-box">
+                <strong>Situación Clínica:</strong><br>
+                ${data.scenario}
+            </div>
+        `;
 
 
-            const currentValue =
-                d[item.id];
+        data.questions.forEach(q => {
+
+            html += `
+                <div class="form-group">
+
+                    <label class="form-label">
+                        ${q.text}
+                    </label>
+
+                    <textarea
+                        id="${q.id}"
+                        class="form-textarea"
+                        placeholder="Escriba la respuesta razonada del equipo..."
+                    ></textarea>
+
+                </div>
+            `;
+
+        });
+
+
+        if (data.hasTable) {
+
+            html += `
+                <label
+                    class="form-label"
+                    style="margin-top:20px;"
+                >
+                    Cuadro Comparativo de Análisis:
+                </label>
+
+                <table class="custom-table">
+
+                    <thead>
+                        <tr>
+            `;
+
+            data.tableHeaders.forEach(h => {
+
+                html += `<th>${h}</th>`;
+
+            });
+
+            html += `
+                        </tr>
+                    </thead>
+
+                    <tbody>
+            `;
+
+
+            data.tableRows.forEach(row => {
+
+                html += `
+                    <tr>
+
+                        <td>
+                            <strong>${row.col1}</strong>
+                        </td>
+
+                        <td>
+                            <input
+                                type="text"
+                                class="form-input"
+                                id="${row.id2}"
+                                placeholder="Completar..."
+                            >
+                        </td>
+
+                        <td>
+                            <input
+                                type="text"
+                                class="form-input"
+                                id="${row.id3}"
+                                placeholder="Completar..."
+                            >
+                        </td>
+
+                    </tr>
+                `;
+
+            });
 
 
             html += `
-
-                <div class="criterion-row">
-
-                    <span class="criterion-label">
-                        ${item.label}
-                    </span>
-
-
-                    <div class="btn-group">
-
-                        ${
-                            options
-                                .map(option => {
-
-                                    let activeClass =
-                                        "";
-
-
-                                    if (
-                                        currentValue ===
-                                        option
-                                    ) {
-
-                                        if (
-                                            option === "✓" ||
-                                            option === "C"
-                                        ) {
-
-                                            activeClass =
-                                                "sel-ok";
-
-                                        }
-
-                                        else if (
-                                            option === "X" ||
-                                            option === "D"
-                                        ) {
-
-                                            activeClass =
-                                                "sel-bad";
-
-                                        }
-
-                                        else {
-
-                                            activeClass =
-                                                "sel-neu";
-
-                                        }
-
-                                    }
-
-
-                                    return `
-
-                                        <button
-                                            type="button"
-                                            class="opt-btn ${activeClass}"
-                                            onclick="
-                                                selectCriterion(
-                                                    '${currentSim}',
-                                                    '${item.id}',
-                                                    '${option}'
-                                                )
-                                            "
-                                        >
-                                            ${option}
-                                        </button>
-
-                                    `;
-
-                                })
-                                .join("")
-                        }
-
-                    </div>
-
-                </div>
-
+                    </tbody>
+                </table>
             `;
 
-        });
+        }
 
 
-        /*
-        ------------------------------------------------------------
-        HALLAZGO PRINCIPAL
-        ------------------------------------------------------------
-        */
+        if (data.decisionPrompt) {
+
+            html += `
+                <div
+                    class="form-group"
+                    style="margin-top:20px;"
+                >
+
+                    <label
+                        class="form-label"
+                        style="color: var(--brand-danger);"
+                    >
+                        ${data.decisionPrompt}
+                    </label>
+
+                    <textarea
+                        id="decision_text"
+                        class="form-textarea"
+                        placeholder="Justificación técnica de la decisión..."
+                    ></textarea>
+
+                </div>
+            `;
+
+        }
+
 
         html += `
+            <div class="fill-box">
 
-            <div
-                class="form-group"
-                style="margin-top:15px;"
-            >
+                <h4 style="margin-bottom: 8px;">
+                    <i class="fa-solid fa-key"></i>
+                    Lo aprendido en el Caso
+                    (Cierre de Consolidación)
+                </h4>
 
-                <label
-                    for="hallazgoInput"
-                >
-                    Hallazgo Principal /
-                    Aspecto Crítico (${currentSim}):
-                </label>
-
-
-                <textarea
-                    id="hallazgoInput"
-                    rows="2"
-                    placeholder="Escriba la observación clave de este caso..."
-                    oninput="saveCurrentHallazgo()"
-                >${escapeHtml(
-                    d.hallazgo || ""
-                )}</textarea>
+                <p>
+                    ${data.consolidationText}
+                </p>
 
             </div>
-
-
-            <button
-                class="btn-primary"
-                onclick="nextSim()"
-            >
-                Guardar y Siguiente SIM →
-            </button>
-
         `;
 
 
-        content.innerHTML =
-            html;
+        container.innerHTML = html;
 
     }
 
 
-    /*
-    ================================================================
-    ESCAPAR TEXTO PARA HTML
-    ================================================================
-    */
+    /* ============================================================
+       RENDER SECUENCIA
+    ============================================================ */
 
-    function escapeHtml(text) {
+    function renderSequenceList() {
 
-        return String(text)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        const container =
+            document.getElementById('sequenceContainer');
 
-    }
+        container.innerHTML = '';
 
 
-    /*
-    ================================================================
-    SELECCIONAR CRITERIO
-    ================================================================
-    */
+        SEQUENCE_ITEMS.forEach(item => {
 
-    function selectCriterion(
-        sim,
-        criterionId,
-        value
-    ) {
+            const div =
+                document.createElement('div');
 
-        saveCurrentHallazgo();
+            div.className = 'sequence-item';
 
 
-        simData[sim][criterionId] =
-            value;
+            div.innerHTML = `
+                <select
+                    class="form-select seq-select"
+                    data-code="${item.code}"
+                >
+
+                    <option value="">
+                        Posición
+                    </option>
+
+                    <option value="1">1°</option>
+                    <option value="2">2°</option>
+                    <option value="3">3°</option>
+                    <option value="4">4°</option>
+                    <option value="5">5°</option>
+                    <option value="6">6°</option>
+                    <option value="7">7°</option>
+
+                </select>
+
+                <span
+                    style="
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        color: var(--brand-primary);
+                    "
+                >
+                    ${item.name}
+                </span>
+            `;
 
 
-        loadSimCard(
-            activeSimIndex
-        );
-
-
-        renderTabs();
-
-
-        checkCompletion();
-
-    }
-
-
-    /*
-    ================================================================
-    SIGUIENTE SIM
-    ================================================================
-    */
-
-    function nextSim() {
-
-        saveCurrentHallazgo();
-
-
-        if (
-            activeSimIndex <
-            simsList.length - 1
-        ) {
-
-            activeSimIndex++;
-
-
-            renderTabs();
-
-
-            loadSimCard(
-                activeSimIndex
-            );
-
-
-            checkCompletion();
-
-        }
-
-        else {
-
-            /*
-            Si estamos en la última SIM,
-            volvemos a la primera.
-            */
-
-            activeSimIndex = 0;
-
-            renderTabs();
-
-            loadSimCard(0);
-
-            checkCompletion();
-
-        }
-
-    }
-
-
-    /*
-    ================================================================
-    COMPROBAR TODAS LAS SIM
-    ================================================================
-    */
-
-    function checkCompletion() {
-
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        let allCompleted = true;
-
-        let completedCount = 0;
-
-
-        simsList.forEach(sim => {
-
-            if (
-                sim === blockedSim
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                isSimComplete(sim)
-            ) {
-
-                completedCount++;
-
-            }
-
-            else {
-
-                allCompleted = false;
-
-            }
+            container.appendChild(div);
 
         });
 
-
-        const btnSubmit =
-            document.getElementById(
-                "btnFinalSubmit"
-            );
+    }
 
 
-        const statusMsg =
-            document.getElementById(
-                "submitStatus"
-            );
+    /* ============================================================
+       FUNCIONES AUXILIARES PARA PDF
+    ============================================================ */
 
+    function escapeHTML(value) {
 
-        const totalAuditar =
-            simsList.length - 1;
-
-
-        if (
-            allCompleted
-        ) {
-
-            btnSubmit.disabled =
-                false;
-
-
-            statusMsg.innerText =
-                "✅ Las 8 SIM auditables están completas. Puedes realizar el envío.";
-
-
-            statusMsg.style.color =
-                "var(--success)";
-
+        if (value === null || value === undefined) {
+            return '';
         }
 
-        else {
-
-            btnSubmit.disabled =
-                true;
-
-
-            statusMsg.innerText =
-                `⚠️ Has completado ${completedCount} de ${totalAuditar} SIM auditables.`;
-
-
-            statusMsg.style.color =
-                "var(--text-muted)";
-
-        }
-
-
-        actualizarProgreso();
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
 
     }
 
 
-    /*
-    ================================================================
-    CONSTRUIR FILAS
-    ================================================================
-    */
+    function escapeHTMLWithBreaks(value) {
 
-    function construirFilasParaEnviar() {
+        return escapeHTML(value)
+            .replace(/\r?\n/g, '<br>');
+    }
 
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
 
+    function stripHTML(html) {
 
-        const estudiante =
-            document
-                .getElementById("estudiante")
-                .value
-                .trim();
+        const temp =
+            document.createElement('div');
 
+        temp.innerHTML = html;
 
-        const documento =
-            document
-                .getElementById("documento")
-                .value
-                .trim();
+        return temp.textContent ||
+               temp.innerText ||
+               '';
 
+    }
 
-        const grupo =
-            document
-                .getElementById("grupo")
-                .value
-                .trim();
 
+    function getInputValue(id) {
 
-        const docente =
-            document
-                .getElementById("docente")
-                .value
-                .trim();
+        const element =
+            document.getElementById(id);
 
+        return element
+            ? element.value.trim()
+            : '';
 
-        const rolInicial =
-            document
-                .getElementById("rolInicial")
-                .value;
+    }
 
 
-        const filasParaEnviar = [];
+    /* ============================================================
+       GENERACIÓN DEL PDF (con jsPDF puro, texto real)
 
+       NOTA IMPORTANTE SOBRE EL CAMBIO DE ENFOQUE:
 
-        /*
-        ============================================================
-        FILA DE LA SIM EJECUTANTE
-        ============================================================
-        */
+       La versión anterior usaba html2canvas para "fotografiar" un
+       bloque de HTML oculto y luego incrustar esa foto en el PDF.
+       Ese método es frágil: en muchos navegadores (sobre todo en
+       móviles / webviews) la captura falla en silencio -> no se
+       lanza ningún error, pero el canvas resultante queda vacío,
+       y el PDF se descarga sin ningún contenido dibujado.
 
-        filasParaEnviar.push([
+       Por eso ahora el PDF se construye con jsPDF directamente,
+       escribiendo texto y formas vectoriales reales en el
+       documento. Esto es mucho más confiable (no depende de que
+       el navegador logre "renderizar y fotografiar" nada), el
+       texto queda seleccionable, y el archivo pesa menos.
+    ============================================================ */
 
-            estudiante,
+    /* Paleta de colores en RGB, tomada de las variables CSS de la app */
+    const PDF_COLORS = {
+        primary:  [15, 23, 42],     // --brand-primary
+        accent:   [2, 132, 199],    // --brand-accent
+        emerald:  [16, 185, 129],   // --brand-emerald
+        warning:  [245, 158, 11],   // --brand-warning
+        danger:   [239, 68, 68],    // --brand-danger
+        muted:    [100, 116, 139],  // --text-muted
+        body:     [51, 65, 85],
+        border:   [226, 232, 240],  // --border
+        bgSoft:   [248, 250, 252],  // --bg-main
+        bgAccent: [240, 249, 255],
+        bgWarn:   [255, 251, 235],
+        bgDanger: [255, 245, 245],
+        white:    [255, 255, 255]
+    };
 
-            documento,
+    /* Construye la clase que maneja cursor, saltos de página y helpers */
+    function createPdfBuilder() {
 
-            grupo,
+        const jsPDFCtor =
+            (window.jspdf && window.jspdf.jsPDF) ||
+            window.jsPDF;
 
-            docente,
+        if (!jsPDFCtor) {
+            throw new Error('jsPDF no está disponible.');
+        }
 
-            rolInicial,
-
-            blockedSim,
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "N/A",
-
-            "EJECUTANTE",
-
-            "Rol activo en esta SIM"
-
-        ]);
-
-
-        /*
-        ============================================================
-        FILAS DE LAS 8 SIM AUDITADAS
-        ============================================================
-        */
-
-        simsList.forEach(sim => {
-
-            if (
-                sim === blockedSim
-            ) {
-
-                return;
-
-            }
-
-
-            const d =
-                simData[sim];
-
-
-            filasParaEnviar.push([
-
-                estudiante,
-
-                documento,
-
-                grupo,
-
-                docente,
-
-                rolInicial,
-
-                sim,
-
-                d.I || "",
-
-                d.S || "",
-
-                d.E || "",
-
-                d.P || "",
-
-                d.IR || "",
-
-                d.CE || "",
-
-                d.C || "",
-
-                d.SE || "",
-
-                d.PM || "",
-
-                d.DEC || "",
-
-                d.hallazgo || ""
-
-            ]);
-
+        const doc = new jsPDFCtor({
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
         });
 
+        const margin = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const usableWidth = pageWidth - margin * 2;
+        const bottomLimit = pageHeight - margin;
 
-        return filasParaEnviar;
+        let y = margin;
 
-    }
-
-
-    /*
-    ================================================================
-    VALIDAR INTEGRIDAD DE LAS FILAS
-    ================================================================
-    */
-
-    function validarFilasParaEnviar(
-        filas
-    ) {
-
-        /*
-        Cada fila debe tener exactamente
-        17 valores antes de que Apps Script
-        agregue el timestamp.
-        */
-
-        const COLUMNAS_ESPERADAS =
-            17;
-
-
-        if (
-            filas.length !== 9
-        ) {
-
-            return {
-
-                valido: false,
-
-                mensaje:
-                    `Se esperaban 9 filas, pero se construyeron ${filas.length}.`
-
-            };
-
+        function ensureSpace(neededHeight) {
+            if (y + neededHeight > bottomLimit) {
+                doc.addPage();
+                y = margin;
+            }
         }
 
-
-        for (
-            let i = 0;
-            i < filas.length;
-            i++
-        ) {
-
-            const fila =
-                filas[i];
-
-
-            if (
-                !Array.isArray(fila)
-            ) {
-
-                return {
-
-                    valido: false,
-
-                    mensaje:
-                        `La fila ${i + 1} no es un arreglo válido.`
-
-                };
-
-            }
-
-
-            if (
-                fila.length !==
-                COLUMNAS_ESPERADAS
-            ) {
-
-                return {
-
-                    valido: false,
-
-                    mensaje:
-                        `La fila ${i + 1} tiene ${fila.length} columnas. Se esperaban ${COLUMNAS_ESPERADAS}.`
-
-                };
-
-            }
-
+        function setColor(rgb) {
+            doc.setTextColor(rgb[0], rgb[1], rgb[2]);
         }
 
+        function addSpacer(h) {
+            y += h;
+        }
+
+        function addRule(color) {
+            ensureSpace(4);
+            doc.setDrawColor(color[0], color[1], color[2]);
+            doc.setLineWidth(0.6);
+            doc.line(margin, y, margin + usableWidth, y);
+            y += 5;
+        }
+
+        function addMainTitle(kicker, title, subtitle) {
+            ensureSpace(26);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            setColor(PDF_COLORS.accent);
+            doc.text(kicker.toUpperCase(), margin, y);
+            y += 6;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18);
+            setColor(PDF_COLORS.primary);
+            doc.text(title, margin, y);
+            y += 6;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9.5);
+            setColor(PDF_COLORS.muted);
+            doc.text(subtitle, margin, y);
+            y += 4;
+
+            addRule(PDF_COLORS.accent);
+            y += 2;
+        }
+
+        function addSectionTitle(text, color) {
+            ensureSpace(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            setColor(color);
+            doc.text(text, margin, y);
+            y += 3;
+            doc.setDrawColor(color[0], color[1], color[2]);
+            doc.setLineWidth(0.4);
+            doc.line(margin, y, margin + usableWidth, y);
+            y += 7;
+        }
+
+        function addLabel(text, color) {
+            ensureSpace(6);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10.5);
+            setColor(color || PDF_COLORS.primary);
+            const lines = doc.splitTextToSize(text, usableWidth);
+            lines.forEach(line => {
+                ensureSpace(5.5);
+                doc.text(line, margin, y);
+                y += 5.5;
+            });
+            y += 1;
+        }
+
+        /* Caja de texto con fondo de color, para respuestas, escenarios, etc. */
+        function addBox(text, {
+            fontSize = 10,
+            style = 'normal',
+            textColor = PDF_COLORS.body,
+            fillColor = PDF_COLORS.bgSoft,
+            borderColor = PDF_COLORS.border,
+            emptyPlaceholder = null
+        } = {}) {
+
+            const displayText =
+                (text && text.trim())
+                    ? text
+                    : (emptyPlaceholder || 'Sin respuesta');
+
+            doc.setFont('helvetica', (text && text.trim()) ? style : 'italic');
+            doc.setFontSize(fontSize);
+
+            const innerWidth = usableWidth - 8;
+            const lines = doc.splitTextToSize(displayText, innerWidth);
+            const lineHeight = fontSize * 0.42;
+            const boxHeight = Math.max(lines.length * lineHeight + 6, 12);
+
+            ensureSpace(boxHeight + 4);
+
+            doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+            doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
+            doc.setLineWidth(0.25);
+            doc.rect(margin, y, usableWidth, boxHeight, 'FD');
+
+            setColor((text && text.trim()) ? textColor : PDF_COLORS.muted);
+            let ty = y + lineHeight + 1;
+            lines.forEach(line => {
+                doc.text(line, margin + 4, ty);
+                ty += lineHeight;
+            });
+
+            y += boxHeight + 5;
+        }
+
+        function addTable(headers, rows) {
+
+            const colWidths = [
+                usableWidth * 0.30,
+                usableWidth * 0.35,
+                usableWidth * 0.35
+            ];
+
+            const headerHeight = 8;
+
+            ensureSpace(headerHeight + 12);
+
+            // Encabezado
+            let cx = margin;
+            doc.setFillColor(241, 245, 249);
+            doc.setDrawColor(203, 213, 225);
+            doc.setLineWidth(0.25);
+            doc.rect(margin, y, usableWidth, headerHeight, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            setColor(PDF_COLORS.primary);
+
+            headers.forEach((h, i) => {
+                doc.text(h, cx + 2, y + 5.5, { maxWidth: colWidths[i] - 4 });
+                cx += colWidths[i];
+            });
+
+            y += headerHeight;
+
+            // Filas
+            rows.forEach(row => {
+
+                const cellTexts = [row.col1, row.val2 || '-', row.val3 || '-'];
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+
+                const wrapped = cellTexts.map((t, i) =>
+                    doc.splitTextToSize(String(t), colWidths[i] - 4)
+                );
+
+                const rowLines = Math.max(...wrapped.map(w => w.length));
+                const rowHeight = Math.max(rowLines * 4.2 + 4, 9);
+
+                ensureSpace(rowHeight);
+
+                cx = margin;
+                doc.setDrawColor(203, 213, 225);
+                doc.setLineWidth(0.2);
+
+                colWidths.forEach(w => {
+                    doc.rect(cx, y, w, rowHeight);
+                    cx += w;
+                });
+
+                cx = margin;
+                wrapped.forEach((lines, i) => {
+                    doc.setFont('helvetica', i === 0 ? 'bold' : 'normal');
+                    setColor(PDF_COLORS.body);
+                    let ty = y + 5;
+                    lines.forEach(line => {
+                        doc.text(line, cx + 2, ty);
+                        ty += 4.2;
+                    });
+                    cx += colWidths[i];
+                });
+
+                y += rowHeight;
+            });
+
+            y += 5;
+        }
+
+        function getY() {
+            return y;
+        }
 
         return {
-
-            valido: true,
-
-            mensaje:
-                "Todas las filas tienen la estructura correcta."
-
+            doc,
+            margin,
+            usableWidth,
+            ensureSpace,
+            addSpacer,
+            addRule,
+            addMainTitle,
+            addSectionTitle,
+            addLabel,
+            addBox,
+            addTable,
+            getY
         };
-
     }
 
-
-    /*
-    ================================================================
-    ENVIAR AUDITORÍA COMPLETA
-    ================================================================
-    */
-
-    function submitFullAudit() {
-
-        saveCurrentHallazgo();
-
-
-        /*
-        ------------------------------------------------------------
-        Verificar nuevamente que las 8 SIM estén completas.
-        ------------------------------------------------------------
-        */
-
-        checkCompletion();
-
-
-        const blockedSim =
-            document
-                .getElementById("simEjecutante")
-                .value;
-
-
-        let incompletas = [];
-
-
-        simsList.forEach(sim => {
-
-            if (
-                sim !== blockedSim &&
-                !isSimComplete(sim)
-            ) {
-
-                incompletas.push(sim);
-
-            }
-
-        });
-
-
-        if (
-            incompletas.length > 0
-        ) {
-
-            alert(
-                "No se puede enviar.\n\n" +
-                "SIM pendientes:\n" +
-                incompletas.join(", ")
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ------------------------------------------------------------
-        Construir filas.
-        ------------------------------------------------------------
-        */
-
-        const filasParaEnviar =
-            construirFilasParaEnviar();
-
-
-        /*
-        ------------------------------------------------------------
-        Validar estructura.
-        ------------------------------------------------------------
-        */
-
-        const validacion =
-            validarFilasParaEnviar(
-                filasParaEnviar
-            );
-
-
-        if (
-            !validacion.valido
-        ) {
-
-            console.error(
-                "ERROR DE INTEGRIDAD:",
-                validacion.mensaje
-            );
-
-
-            alert(
-                "No se puede enviar la evaluación.\n\n" +
-                validacion.mensaje
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        ------------------------------------------------------------
-        Mostrar información en consola.
-        ------------------------------------------------------------
-        */
-
-        console.log(
-            "========================================"
-        );
-
-        console.log(
-            "ENVÍO DE AUDITORÍA"
-        );
-
-        console.log(
-            "========================================"
-        );
-
-        console.log(
-            "Cantidad de filas:",
-            filasParaEnviar.length
-        );
-
-        console.log(
-            "Columnas por fila:",
-            filasParaEnviar.map(
-                fila => fila.length
-            )
-        );
-
-        console.log(
-            "Datos preparados:",
-            filasParaEnviar
-        );
-
-
-        /*
-        ------------------------------------------------------------
-        Payload final.
-        ------------------------------------------------------------
-        */
-
-        const payload = {
-
-            filas:
-                filasParaEnviar
-
-        };
-
-
-        console.log(
-            "Payload:",
-            JSON.stringify(payload)
-        );
-
-
-        /*
-        ------------------------------------------------------------
-        Deshabilitar botón.
-        ------------------------------------------------------------
-        */
-
-        const btn =
-            document.getElementById(
-                "btnFinalSubmit"
-            );
-
-
-        btn.disabled =
-            true;
-
-
-        btn.innerText =
-            "Enviando registros a Google Sheets...";
-
-
-        /*
-        ============================================================
-        ENVÍO A GOOGLE APPS SCRIPT
-        ============================================================
-        */
-
-        fetch(
-            SCRIPT_URL,
-            {
-
-                method: "POST",
-
-                mode: "no-cors",
-
-                headers: {
-
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-
-                },
-
-                body:
-                    JSON.stringify(payload)
-
+    /* Convierte el texto de consolidación (con <input> embebidos) en texto
+       plano, reemplazando cada input por el valor que el equipo escribió. */
+    function buildConsolidationPlainText(consolidationHTML) {
+
+        return consolidationHTML.replace(
+            /<input[^>]*id=["']([\w-]+)["'][^>]*>/gi,
+            (match, id) => {
+                const value = getInputValue(id);
+                return value ? `[ ${value} ]` : '[ ______ ]';
             }
         )
+        // por si quedara cualquier otra etiqueta HTML residual
+        .replace(/<[^>]+>/g, '');
+    }
 
-        .then(() => {
+    async function submitWork() {
 
-            console.log(
-                "Datos enviados correctamente al endpoint."
+        try {
+
+            /* ----------------------------------------------------
+               VALIDACIONES
+            ---------------------------------------------------- */
+
+            const grandConclusion =
+                getInputValue('inputGrandConclusion');
+
+            const vfSelection =
+                document.querySelector(
+                    'input[name="vf_option"]:checked'
+                );
+
+            if (!grandConclusion || !vfSelection) {
+
+                alert(
+                    "Por favor completa la Gran Conclusión de Aula y selecciona tu respuesta de Falso o Verdadero en la PARTE II antes de generar el PDF."
+                );
+
+                return;
+            }
+
+            if (!selectedCaseId) {
+
+                alert(
+                    "No se ha seleccionado ningún caso clínico."
+                );
+
+                return;
+            }
+
+            const jsPDFAvailable =
+                (window.jspdf && window.jspdf.jsPDF) ||
+                window.jsPDF;
+
+            if (!jsPDFAvailable) {
+
+                alert(
+                    "La librería de generación de PDF no pudo cargarse. Verifica tu conexión a Internet y vuelve a intentarlo."
+                );
+
+                return;
+            }
+
+            const caseData = CASES_DATA[selectedCaseId];
+
+            const pdf = createPdfBuilder();
+
+            /* ---------------- ENCABEZADO ---------------- */
+
+            pdf.addMainTitle(
+                'Microbiología | Auxiliar de Enfermería',
+                'Análisis Guiado de Casos Clínicos',
+                'Fecha: 23 de Agosto de 2026   |   Duración: 60 minutos'
             );
 
+            /* ---------------- EQUIPO ---------------- */
 
-            document
-                .getElementById("step2")
-                .classList.add("hidden");
+            pdf.addBox(
+                `Grupo: ${groupData.number}\n` +
+                `Integrantes: ${groupData.members.length ? groupData.members.join(', ') : 'Sin especificar'}`,
+                { fontSize: 10, fillColor: PDF_COLORS.bgSoft, borderColor: PDF_COLORS.border, textColor: PDF_COLORS.primary }
+            );
 
+            pdf.addSpacer(2);
 
-            document
-                .getElementById("step3")
-                .classList.remove("hidden");
+            /* ---------------- PARTE I ---------------- */
 
-        })
+            pdf.addSectionTitle(`PARTE I: ${caseData.title}`, PDF_COLORS.accent);
 
-        .catch(error => {
+            pdf.doc.setFont('helvetica', 'italic');
+            pdf.doc.setFontSize(9.5);
+            pdf.doc.setTextColor(PDF_COLORS.muted[0], PDF_COLORS.muted[1], PDF_COLORS.muted[2]);
+            pdf.ensureSpace(6);
+            pdf.doc.text(`Enfoque: ${caseData.focus}`, pdf.margin, pdf.getY());
+            pdf.addSpacer(6);
+
+            pdf.addLabel('Situación Clínica:', PDF_COLORS.accent);
+            pdf.addBox(stripHTML(caseData.scenario), {
+                fontSize: 10,
+                fillColor: PDF_COLORS.bgAccent,
+                borderColor: [186, 230, 253],
+                textColor: [12, 74, 110]
+            });
+
+            caseData.questions.forEach(q => {
+                pdf.addLabel(q.text, PDF_COLORS.primary);
+                pdf.addBox(getInputValue(q.id), {
+                    fontSize: 10,
+                    fillColor: [250, 250, 250],
+                    borderColor: PDF_COLORS.border,
+                    textColor: PDF_COLORS.body
+                });
+            });
+
+            if (caseData.hasTable) {
+                pdf.addLabel('Cuadro Comparativo de Análisis:', PDF_COLORS.primary);
+                pdf.addTable(
+                    caseData.tableHeaders,
+                    caseData.tableRows.map(row => ({
+                        col1: row.col1,
+                        val2: getInputValue(row.id2),
+                        val3: getInputValue(row.id3)
+                    }))
+                );
+            }
+
+            if (caseData.decisionPrompt) {
+                pdf.addLabel(caseData.decisionPrompt, PDF_COLORS.danger);
+                pdf.addBox(getInputValue('decision_text'), {
+                    fontSize: 10,
+                    fillColor: PDF_COLORS.bgDanger,
+                    borderColor: [254, 202, 202],
+                    textColor: [153, 27, 27],
+                    emptyPlaceholder: 'Sin decisión registrada'
+                });
+            }
+
+            pdf.addLabel('Lo aprendido en el Caso (Cierre de Consolidación):', PDF_COLORS.warning);
+            pdf.addBox(
+                buildConsolidationPlainText(caseData.consolidationText),
+                {
+                    fontSize: 10,
+                    fillColor: PDF_COLORS.bgWarn,
+                    borderColor: [253, 230, 138],
+                    textColor: [120, 53, 15]
+                }
+            );
+
+            pdf.addSpacer(4);
+
+            /* ---------------- PARTE II ---------------- */
+
+            pdf.addSectionTitle('PARTE II: Integración y Cierre General de Clase', PDF_COLORS.emerald);
+
+            pdf.addLabel('1. Orden Secuencial de la Cadena Preanalítica:', PDF_COLORS.primary);
+
+            const sequenceLines = [];
+            document.querySelectorAll('.seq-select').forEach(sel => {
+                const code = sel.getAttribute('data-code');
+                const pos = sel.value || '?';
+                const itemObj = SEQUENCE_ITEMS.find(i => i.code === code);
+                sequenceLines.push(`[ ${pos}° ]  ${itemObj.name}`);
+            });
+            pdf.addBox(sequenceLines.join('\n'), {
+                fontSize: 9.5,
+                fillColor: PDF_COLORS.bgSoft,
+                borderColor: PDF_COLORS.border,
+                textColor: PDF_COLORS.primary
+            });
+
+            pdf.addLabel('2. Gran Conclusión de Aula:', PDF_COLORS.primary);
+            pdf.addBox(grandConclusion, {
+                fontSize: 10,
+                fillColor: [250, 250, 250],
+                borderColor: PDF_COLORS.border,
+                textColor: PDF_COLORS.body
+            });
+
+            pdf.addLabel('3. Verificación de Premisa Fundamental (V/F):', PDF_COLORS.primary);
+            pdf.addBox(`Respuesta seleccionada: ${vfSelection.value}`, {
+                fontSize: 10.5,
+                style: 'bold',
+                fillColor: PDF_COLORS.bgSoft,
+                borderColor: PDF_COLORS.border,
+                textColor: vfSelection.value === 'VERDADERO' ? PDF_COLORS.emerald : PDF_COLORS.danger
+            });
+
+            /* ---------------- GUARDAR ---------------- */
+
+            const cleanGroupName =
+                groupData.number.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]/g, '_');
+
+            pdf.doc.save(
+                `Microbiologia_${cleanGroupName}_Caso${selectedCaseId}.pdf`
+            );
+
+            alert(
+                "¡Documento PDF generado y descargado exitosamente!"
+            );
+
+        }
+
+        catch (error) {
 
             console.error(
-                "Error durante el envío:",
+                "ERROR GENERANDO PDF:",
                 error
             );
 
-
             alert(
-                "Se produjo un error durante el envío. Reintente."
+                "No fue posible generar el PDF. Abre la consola del navegador (F12) para revisar el error."
             );
 
-
-            btn.disabled =
-                false;
-
-
-            btn.innerText =
-                "💾 Enviar Evaluación Completa a Google Sheets";
-
-        });
+        }
 
     }
 
