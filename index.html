@@ -75,7 +75,6 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-        /* TABS DE NAVEGACIÓN SIM */
         .tabs-container {
             display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px;
             margin-bottom: 16px; scrollbar-width: none;
@@ -90,7 +89,6 @@
         .tab-btn.completed { border-color: var(--success); color: var(--success); background: var(--success-bg); }
         .tab-btn.blocked { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
 
-        /* CRITERIOS DE AUDITORÍA */
         .criterion-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 0; border-bottom: 1px solid var(--border);
@@ -139,12 +137,12 @@
         <p>Hoja Auditora de Simulación Interactiva</p>
     </div>
 
-    <!-- PASO 1: REGISTRO INICIAL -->
+    <!-- PASO 1: DATOS GENERALES -->
     <div id="step1" class="card">
         <h2 style="font-size: 1.05rem; margin-top: 0; color: var(--primary-dark);">Datos de Registro</h2>
         <div class="form-group">
             <label for="estudiante">Nombre del Estudiante:</label>
-            <input type="text" id="estudiante" placeholder="Ej. Ana Martínez" required>
+            <input type="text" id="estudiante" placeholder="Ej. Oscar Eduardo Echenique Dominguez" required>
         </div>
         <div class="grid-2">
             <div class="form-group">
@@ -157,6 +155,10 @@
             </div>
         </div>
         <div class="grid-2">
+            <div class="form-group">
+                <label for="docente">Docente / Evaluador:</label>
+                <input type="text" id="docente" placeholder="Nombre del docente">
+            </div>
             <div class="form-group">
                 <label for="simEjecutante">SIM en la que ejecutas:</label>
                 <select id="simEjecutante" required>
@@ -172,18 +174,18 @@
                     <option value="SIM-09">SIM-09</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="rolInicial">Rol Asignado:</label>
-                <select id="rolInicial" required>
-                    <option value="Auxiliar / Ejecutor">Auxiliar / Ejecutor</option>
-                    <option value="Paciente">Paciente</option>
-                </select>
-            </div>
+        </div>
+        <div class="form-group">
+            <label for="rolInicial">Rol Inicial:</label>
+            <select id="rolInicial" required>
+                <option value="Auxiliar / Ejecutor">Auxiliar / Ejecutor</option>
+                <option value="Paciente">Paciente</option>
+            </select>
         </div>
         <button class="btn-primary" onclick="startAudit()">Comenzar Auditoría →</button>
     </div>
 
-    <!-- PASO 2: ESTRUCTURA DE AUDITORÍA -->
+    <!-- PASO 2: FORMULARIO DE AUDITORÍA -->
     <div id="step2" class="hidden">
         <div class="tabs-container" id="tabsList"></div>
 
@@ -201,11 +203,11 @@
         </div>
     </div>
 
-    <!-- PASO 3: CONFIRMACIÓN DE ENVÍO -->
+    <!-- PASO 3: RESPUESTA DE ENVÍO -->
     <div id="step3" class="card hidden" style="text-align: center; padding: 40px 20px;">
         <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
         <h2 style="color: var(--success); margin: 0 0 10px;">¡Auditoría Registrada!</h2>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">Tus evaluaciones han sido enviadas correctamente a la hoja de Google Sheets de IDECO.</p>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Las evaluaciones han sido guardadas fila por fila en la hoja de Google Sheets.</p>
     </div>
 </div>
 
@@ -222,7 +224,7 @@
         { id: "C", label: "Comunicación" },
         { id: "SE", label: "Seguridad" },
         { id: "PM", label: "Puesto y materiales" },
-        { id: "DEC", label: "DECISIÓN GLOBAL", isDec: true }
+        { id: "DEC", label: "Decisión Global", isDec: true }
     ];
 
     let activeSimIndex = 0;
@@ -235,11 +237,10 @@
         const simE = document.getElementById("simEjecutante").value;
 
         if (!est || !doc || !simE) {
-            alert("Por favor complete sus datos e indique la SIM que ejecutará.");
+            alert("Por favor ingrese su Nombre, Documento y la SIM en la que participa.");
             return;
         }
 
-        // Inicializar estructura limpia
         simsList.forEach(sim => {
             simData[sim] = { I:"", S:"", E:"", P:"", IR:"", CE:"", C:"", SE:"", PM:"", DEC:"", hallazgo:"" };
         });
@@ -269,7 +270,12 @@
                 btn.innerText = sim;
             }
 
-            btn.onclick = () => { saveCurrentHallazgo(); activeSimIndex = idx; renderTabs(); loadSimCard(idx); };
+            btn.onclick = () => { 
+                saveCurrentHallazgo(); 
+                activeSimIndex = idx; 
+                renderTabs(); 
+                loadSimCard(idx); 
+            };
             container.appendChild(btn);
         });
     }
@@ -285,7 +291,9 @@
         const blockedSim = document.getElementById("simEjecutante").value;
         if (currentSim !== blockedSim) {
             const textarea = document.getElementById("hallazgoInput");
-            if (textarea) simData[currentSim].hallazgo = textarea.value;
+            if (textarea) {
+                simData[currentSim].hallazgo = textarea.value;
+            }
         }
     }
 
@@ -300,7 +308,7 @@
                     <div style="font-size: 2rem; margin-bottom: 8px;">🎭</div>
                     <h3 style="margin: 0 0 6px; color: var(--text-main);">Caso en Ejecución Activa</h3>
                     <p style="margin: 0 0 15px; font-size: 0.85rem; color: var(--text-muted);">
-                        Participas como ejecutante/paciente en la <strong>${currentSim}</strong>. No realizas auditoría sobre ti mismo.
+                        Actúas como ejecutante/paciente en la <strong>${currentSim}</strong>. No realizas auditoría en este caso.
                     </p>
                     <button class="btn-primary" onclick="nextSim()">Ir a la Siguiente SIM →</button>
                 </div>
@@ -335,11 +343,11 @@
             `;
         });
 
-        // CAJA DE HALLAZGO ESPECÍFICO POR SIM
+        // Hallazgo individual guardado
         html += `
             <div class="form-group" style="margin-top: 15px;">
                 <label for="hallazgoInput">Hallazgo Principal / Aspecto Crítico (${currentSim}):</label>
-                <textarea id="hallazgoInput" rows="2" placeholder="Escriba el hallazgo o falla crítica observada en este caso..." onchange="saveCurrentHallazgo()">${simData[currentSim].hallazgo || ''}</textarea>
+                <textarea id="hallazgoInput" rows="2" placeholder="Escriba la observación clave de este caso..." oninput="saveCurrentHallazgo()">${simData[currentSim].hallazgo || ''}</textarea>
             </div>
             <button class="btn-primary" onclick="nextSim()">Guardar y Siguiente SIM →</button>
         `;
@@ -379,7 +387,7 @@
 
         if (allCompleted) {
             btnSubmit.disabled = false;
-            statusMsg.innerText = "✅ ¡Has completado la evaluación de todas las SIM! Ya puedes enviar.";
+            statusMsg.innerText = "✅ Auditoría completada. Puedes realizar el envío.";
             statusMsg.style.color = "var(--success)";
         } else {
             btnSubmit.disabled = true;
@@ -392,21 +400,27 @@
         saveCurrentHallazgo();
         const btn = document.getElementById("btnFinalSubmit");
         btn.disabled = true;
-        btn.innerText = "Enviando auditoría a Google Sheets...";
+        btn.innerText = "Enviando registros a Google Sheets...";
 
         const blockedSim = document.getElementById("simEjecutante").value;
-        const formattedSims = {};
+        const registros = [];
 
-        // Empaquetar criterios + hallazgo por SIM
         simsList.forEach(sim => {
-            if (sim === blockedSim) {
-                formattedSims[sim] = "N/A (Rol Activo / Ejecutante)";
-            } else if (isSimComplete(sim)) {
-                const d = simData[sim];
-                const hallTxt = d.hallazgo ? ` | HALLAZGO: ${d.hallazgo}` : '';
-                formattedSims[sim] = `I(${d.I}), S(${d.S}), E(${d.E}), P(${d.P}), IR(${d.IR}), CE(${d.CE}), C(${d.C}), SE(${d.SE}), PM(${d.PM}) | DECISIÓN: ${d.DEC}${hallTxt}`;
-            } else {
-                formattedSims[sim] = "Incompleto";
+            if (sim !== blockedSim && isSimComplete(sim)) {
+                registros.push({
+                    sim: sim,
+                    I: simData[sim].I,
+                    S: simData[sim].S,
+                    E: simData[sim].E,
+                    P: simData[sim].P,
+                    IR: simData[sim].IR,
+                    CE: simData[sim].CE,
+                    C: simData[sim].C,
+                    SE: simData[sim].SE,
+                    PM: simData[sim].PM,
+                    DEC: simData[sim].DEC,
+                    hallazgo: simData[sim].hallazgo || ""
+                });
             }
         });
 
@@ -414,9 +428,10 @@
             estudiante: document.getElementById("estudiante").value,
             documento: document.getElementById("documento").value,
             grupo: document.getElementById("grupo").value,
+            docente: document.getElementById("docente").value,
             simEjecutante: blockedSim,
             rolInicial: document.getElementById("rolInicial").value,
-            sims: formattedSims
+            registros: registros
         };
 
         fetch(SCRIPT_URL, {
@@ -430,7 +445,7 @@
             document.getElementById("step3").classList.remove("hidden");
         })
         .catch(err => {
-            alert("Error de conexión. Intente enviar nuevamente.");
+            alert("Error al enviar los datos. Reintente por favor.");
             btn.disabled = false;
             btn.innerText = "💾 Enviar Evaluación Completa a Google Sheets";
         });
