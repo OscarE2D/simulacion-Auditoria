@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hoja Auditora - Simulación IDECO</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
 
     <style>
         :root {
@@ -45,13 +48,18 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            background: linear-gradient(
+                135deg,
+                #0284c7 0%,
+                #0369a1 100%
+            );
             color: white;
             padding: 20px;
             border-radius: 16px;
             text-align: center;
             margin-bottom: 20px;
-            box-shadow: 0 10px 15px -3px rgba(2, 132, 199, 0.25);
+            box-shadow:
+                0 10px 15px -3px rgba(2, 132, 199, 0.25);
         }
 
         .header h1 {
@@ -109,7 +117,8 @@
             outline: none;
             border-color: var(--primary);
             background-color: #fff;
-            box-shadow: 0 0 0 3px var(--primary-light);
+            box-shadow:
+                0 0 0 3px var(--primary-light);
         }
 
         .grid-2 {
@@ -148,7 +157,8 @@
             background: var(--primary);
             color: white;
             border-color: var(--primary);
-            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
+            box-shadow:
+                0 2px 4px rgba(2, 132, 199, 0.3);
         }
 
         .tab-btn.completed {
@@ -226,7 +236,8 @@
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
+            box-shadow:
+                0 4px 6px -1px rgba(2, 132, 199, 0.2);
         }
 
         .btn-primary:hover {
@@ -264,16 +275,15 @@
             font-weight: 500;
         }
 
-        .debug-box {
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 12px;
+        .progress-box {
+            margin-bottom: 16px;
+            padding: 12px 14px;
             border-radius: 10px;
-            margin-top: 15px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            white-space: pre-wrap;
-            overflow-x: auto;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
         }
 
         .hidden {
@@ -286,86 +296,168 @@
 
 <div class="app-container">
 
+    <!-- ========================================================= -->
+    <!-- ENCABEZADO                                                -->
+    <!-- ========================================================= -->
+
     <div class="header">
-        <h1>IDECO — LABORATORIO CLÍNICO</h1>
-        <p>Hoja Auditora de Simulación Interactiva</p>
+
+        <h1>
+            IDECO — LABORATORIO CLÍNICO
+        </h1>
+
+        <p>
+            Hoja Auditora de Simulación Interactiva
+        </p>
+
     </div>
+
 
     <!-- ========================================================= -->
     <!-- PASO 1: DATOS GENERALES                                   -->
     <!-- ========================================================= -->
 
-    <div id="step1" class="card">
+    <div
+        id="step1"
+        class="card"
+    >
 
-        <h2 style="font-size: 1.05rem; margin-top: 0; color: var(--primary-dark);">
+        <h2
+            style="
+                font-size:1.05rem;
+                margin-top:0;
+                color:var(--primary-dark);
+            "
+        >
             Datos de Registro
         </h2>
 
+
         <div class="form-group">
-            <label for="estudiante">Nombre del Estudiante:</label>
+
+            <label for="estudiante">
+                Nombre del Estudiante:
+            </label>
+
             <input
                 type="text"
                 id="estudiante"
                 placeholder="Ej. Oscar Eduardo Echenique Dominguez"
                 required
             >
+
         </div>
+
 
         <div class="grid-2">
 
             <div class="form-group">
-                <label for="documento">Documento / ID:</label>
+
+                <label for="documento">
+                    Documento / ID:
+                </label>
+
                 <input
                     type="text"
                     id="documento"
                     placeholder="Cédula"
                     required
                 >
+
             </div>
 
+
             <div class="form-group">
-                <label for="grupo">Grupo:</label>
+
+                <label for="grupo">
+                    Grupo:
+                </label>
+
                 <input
                     type="text"
                     id="grupo"
                     value="Auxiliar Enfermería"
                 >
+
             </div>
 
         </div>
 
+
         <div class="grid-2">
 
             <div class="form-group">
-                <label for="docente">Docente / Evaluador:</label>
+
+                <label for="docente">
+                    Docente / Evaluador:
+                </label>
+
                 <input
                     type="text"
                     id="docente"
                     placeholder="Nombre del docente"
                 >
+
             </div>
 
+
             <div class="form-group">
-                <label for="simEjecutante">SIM en la que ejecutas:</label>
 
-                <select id="simEjecutante" required>
+                <label for="simEjecutante">
+                    SIM en la que ejecutas:
+                </label>
 
-                    <option value="">Seleccione...</option>
+                <select
+                    id="simEjecutante"
+                    required
+                >
 
-                    <option value="SIM-01">SIM-01</option>
-                    <option value="SIM-02">SIM-02</option>
-                    <option value="SIM-03">SIM-03</option>
-                    <option value="SIM-04">SIM-04</option>
-                    <option value="SIM-05">SIM-05</option>
-                    <option value="SIM-06">SIM-06</option>
-                    <option value="SIM-07">SIM-07</option>
-                    <option value="SIM-08">SIM-08</option>
-                    <option value="SIM-09">SIM-09</option>
+                    <option value="">
+                        Seleccione...
+                    </option>
+
+                    <option value="SIM-01">
+                        SIM-01
+                    </option>
+
+                    <option value="SIM-02">
+                        SIM-02
+                    </option>
+
+                    <option value="SIM-03">
+                        SIM-03
+                    </option>
+
+                    <option value="SIM-04">
+                        SIM-04
+                    </option>
+
+                    <option value="SIM-05">
+                        SIM-05
+                    </option>
+
+                    <option value="SIM-06">
+                        SIM-06
+                    </option>
+
+                    <option value="SIM-07">
+                        SIM-07
+                    </option>
+
+                    <option value="SIM-08">
+                        SIM-08
+                    </option>
+
+                    <option value="SIM-09">
+                        SIM-09
+                    </option>
 
                 </select>
+
             </div>
 
         </div>
+
 
         <div class="form-group">
 
@@ -373,7 +465,10 @@
                 Rol Inicial:
             </label>
 
-            <select id="rolInicial" required>
+            <select
+                id="rolInicial"
+                required
+            >
 
                 <option value="Auxiliar / Ejecutor">
                     Auxiliar / Ejecutor
@@ -387,6 +482,7 @@
 
         </div>
 
+
         <button
             class="btn-primary"
             onclick="startAudit()"
@@ -398,10 +494,21 @@
 
 
     <!-- ========================================================= -->
-    <!-- PASO 2: FORMULARIO DE AUDITORÍA                           -->
+    <!-- PASO 2: AUDITORÍA                                         -->
     <!-- ========================================================= -->
 
-    <div id="step2" class="hidden">
+    <div
+        id="step2"
+        class="hidden"
+    >
+
+        <div
+            class="progress-box"
+            id="progressBox"
+        >
+            Preparando las 9 simulaciones...
+        </div>
+
 
         <div
             class="tabs-container"
@@ -414,10 +521,16 @@
             id="auditCard"
         >
 
-            <div id="cardContent"></div>
+            <div
+                id="cardContent"
+            ></div>
 
         </div>
 
+
+        <!-- ===================================================== -->
+        <!-- ENVÍO                                                  -->
+        <!-- ===================================================== -->
 
         <div class="card">
 
@@ -427,22 +540,15 @@
                 disabled
                 onclick="submitFullAudit()"
             >
-                💾 Enviar Evaluación a Google Sheets
+                💾 Enviar Evaluación Completa a Google Sheets
             </button>
+
 
             <div
                 id="submitStatus"
                 class="status-msg"
             >
-                ⚠️ Completa la SIM que estás auditando para habilitar el envío.
-            </div>
-
-            <!-- DIAGNÓSTICO VISIBLE -->
-            <div
-                id="debugBox"
-                class="debug-box"
-            >
-                Diagnóstico: esperando datos...
+                ⚠️ Completa las 8 SIM que debes auditar para habilitar el envío.
             </div>
 
         </div>
@@ -451,29 +557,46 @@
 
 
     <!-- ========================================================= -->
-    <!-- PASO 3: RESPUESTA DE ENVÍO                                -->
+    <!-- PASO 3: CONFIRMACIÓN                                      -->
     <!-- ========================================================= -->
 
     <div
         id="step3"
         class="card hidden"
-        style="text-align:center; padding:40px 20px;"
+        style="
+            text-align:center;
+            padding:40px 20px;
+        "
     >
 
-        <div style="font-size:3rem; margin-bottom:10px;">
+        <div
+            style="
+                font-size:3rem;
+                margin-bottom:10px;
+            "
+        >
             🎉
         </div>
 
+
         <h2
-            style="color:var(--success); margin:0 0 10px;"
+            style="
+                color:var(--success);
+                margin:0 0 10px;
+            "
         >
             ¡Auditoría Registrada!
         </h2>
 
+
         <p
-            style="color:var(--text-muted); font-size:0.9rem;"
+            style="
+                color:var(--text-muted);
+                font-size:0.9rem;
+            "
         >
-            La evaluación fue enviada a Google Sheets.
+            Las 9 simulaciones fueron guardadas
+            correctamente en Google Sheets.
         </p>
 
     </div>
@@ -485,7 +608,7 @@
 
     /*
     ================================================================
-    CONFIGURACIÓN
+    CONFIGURACIÓN GOOGLE APPS SCRIPT
     ================================================================
     */
 
@@ -495,7 +618,7 @@
 
     /*
     ================================================================
-    CRITERIOS
+    CRITERIOS DE AUDITORÍA
     ================================================================
     */
 
@@ -557,20 +680,12 @@
 
     /*
     ================================================================
-    SIMULACIONES
-    ================================================================
-
-    IMPORTANTE:
-
-    Para esta prueba SOLO utilizaremos DOS SIM:
-
-    1. SIM seleccionada como ejecutante.
-    2. Una SIM adicional que será auditada.
-
+    LAS 9 SIMULACIONES
     ================================================================
     */
 
-    const allSims = [
+    const simsList = [
+
         "SIM-01",
         "SIM-02",
         "SIM-03",
@@ -580,10 +695,15 @@
         "SIM-07",
         "SIM-08",
         "SIM-09"
+
     ];
 
 
-    let testSims = [];
+    /*
+    ================================================================
+    ESTADO
+    ================================================================
+    */
 
     let activeSimIndex = 0;
 
@@ -598,48 +718,48 @@
 
     function startAudit() {
 
-        const est =
-            document.getElementById("estudiante").value.trim();
+        const estudiante =
+            document
+                .getElementById("estudiante")
+                .value
+                .trim();
 
-        const doc =
-            document.getElementById("documento").value.trim();
 
-        const simE =
-            document.getElementById("simEjecutante").value;
+        const documento =
+            document
+                .getElementById("documento")
+                .value
+                .trim();
 
-        if (!est || !doc || !simE) {
+
+        const simEjecutante =
+            document
+                .getElementById("simEjecutante")
+                .value;
+
+
+        if (
+            !estudiante ||
+            !documento ||
+            !simEjecutante
+        ) {
 
             alert(
                 "Por favor ingrese Nombre, Documento y SIM."
             );
 
             return;
+
         }
 
 
         /*
         ------------------------------------------------------------
-        Seleccionamos solamente DOS SIM.
+        Inicializar las 9 SIM.
         ------------------------------------------------------------
         */
 
-        const otraSim =
-            allSims.find(sim => sim !== simE);
-
-
-        testSims = [
-            simE,
-            otraSim
-        ];
-
-
-        /*
-        ------------------------------------------------------------
-        Inicializamos los datos.
-        ------------------------------------------------------------
-        */
-
-        testSims.forEach(sim => {
+        simsList.forEach(sim => {
 
             simData[sim] = {
 
@@ -662,13 +782,14 @@
 
         /*
         ------------------------------------------------------------
-        Mostramos el formulario.
+        Cambiar pantalla.
         ------------------------------------------------------------
         */
 
         document
             .getElementById("step1")
             .classList.add("hidden");
+
 
         document
             .getElementById("step2")
@@ -677,29 +798,64 @@
 
         activeSimIndex = 0;
 
+
+        actualizarProgreso();
+
         renderTabs();
 
         loadSimCard(0);
 
         checkCompletion();
 
+    }
 
-        console.log(
-            "SIM DE EJECUCIÓN:",
-            simE
-        );
 
-        console.log(
-            "SIM DE AUDITORÍA:",
-            otraSim
-        );
+    /*
+    ================================================================
+    ACTUALIZAR PROGRESO
+    ================================================================
+    */
+
+    function actualizarProgreso() {
+
+        const blockedSim =
+            document
+                .getElementById("simEjecutante")
+                .value;
+
+
+        let completadas = 0;
+
+
+        simsList.forEach(sim => {
+
+            if (
+                sim !== blockedSim &&
+                isSimComplete(sim)
+            ) {
+
+                completadas++;
+
+            }
+
+        });
+
+
+        const totalAuditar =
+            simsList.length - 1;
+
+
+        document
+            .getElementById("progressBox")
+            .innerText =
+                `Progreso de auditoría: ${completadas} de ${totalAuditar} SIM completadas`;
 
     }
 
 
     /*
     ================================================================
-    PESTAÑAS
+    CREAR PESTAÑAS
     ================================================================
     */
 
@@ -708,73 +864,98 @@
         const container =
             document.getElementById("tabsList");
 
+
         container.innerHTML = "";
 
 
         const blockedSim =
-            document.getElementById("simEjecutante").value;
+            document
+                .getElementById("simEjecutante")
+                .value;
 
 
-        testSims.forEach((sim, idx) => {
+        simsList.forEach(
+            (sim, index) => {
 
-            const btn =
-                document.createElement("button");
-
-
-            btn.className =
-                `tab-btn ${
-                    idx === activeSimIndex
-                        ? "active"
-                        : ""
-                }`;
+                const btn =
+                    document.createElement("button");
 
 
-            if (sim === blockedSim) {
+                btn.className =
+                    `tab-btn ${
+                        index === activeSimIndex
+                            ? "active"
+                            : ""
+                    }`;
 
-                btn.classList.add("blocked");
 
-                btn.innerText =
-                    `${sim} (Tú)`;
+                /*
+                ----------------------------------------------------
+                SIM ejecutante
+                ----------------------------------------------------
+                */
 
-            }
+                if (
+                    sim === blockedSim
+                ) {
 
-            else {
+                    btn.classList.add("blocked");
 
-                if (isSimComplete(sim)) {
-
-                    btn.classList.add("completed");
+                    btn.innerText =
+                        `${sim} (Tú)`;
 
                 }
 
-                btn.innerText =
-                    sim;
+                /*
+                ----------------------------------------------------
+                SIM auditables
+                ----------------------------------------------------
+                */
+
+                else {
+
+                    if (
+                        isSimComplete(sim)
+                    ) {
+
+                        btn.classList.add(
+                            "completed"
+                        );
+
+                    }
+
+                    btn.innerText = sim;
+
+                }
+
+
+                btn.onclick = () => {
+
+                    saveCurrentHallazgo();
+
+                    activeSimIndex =
+                        index;
+
+                    renderTabs();
+
+                    loadSimCard(
+                        activeSimIndex
+                    );
+
+                };
+
+
+                container.appendChild(btn);
 
             }
-
-
-            btn.onclick = () => {
-
-                saveCurrentHallazgo();
-
-                activeSimIndex = idx;
-
-                renderTabs();
-
-                loadSimCard(idx);
-
-            };
-
-
-            container.appendChild(btn);
-
-        });
+        );
 
     }
 
 
     /*
     ================================================================
-    VERIFICAR SI UNA SIM ESTÁ COMPLETA
+    COMPROBAR SI UNA SIM ESTÁ COMPLETA
     ================================================================
     */
 
@@ -783,13 +964,15 @@
         const d =
             simData[sim];
 
+
         if (!d) {
 
             return false;
 
         }
 
-        return (
+
+        return Boolean(
 
             d.I &&
             d.S &&
@@ -809,35 +992,41 @@
 
     /*
     ================================================================
-    GUARDAR HALLAZGO
+    GUARDAR HALLAZGO ACTUAL
     ================================================================
     */
 
     function saveCurrentHallazgo() {
 
         const currentSim =
-            testSims[activeSimIndex];
+            simsList[activeSimIndex];
+
 
         const blockedSim =
+            document
+                .getElementById("simEjecutante")
+                .value;
+
+
+        if (
+            currentSim === blockedSim
+        ) {
+
+            return;
+
+        }
+
+
+        const textarea =
             document.getElementById(
-                "simEjecutante"
-            ).value;
+                "hallazgoInput"
+            );
 
 
-        if (currentSim !== blockedSim) {
+        if (textarea) {
 
-            const textarea =
-                document.getElementById(
-                    "hallazgoInput"
-                );
-
-
-            if (textarea) {
-
-                simData[currentSim].hallazgo =
-                    textarea.value;
-
-            }
+            simData[currentSim].hallazgo =
+                textarea.value;
 
         }
 
@@ -846,19 +1035,20 @@
 
     /*
     ================================================================
-    CARGAR SIM
+    CARGAR TARJETA DE SIM
     ================================================================
     */
 
     function loadSimCard(index) {
 
         const currentSim =
-            testSims[index];
+            simsList[index];
+
 
         const blockedSim =
-            document.getElementById(
-                "simEjecutante"
-            ).value;
+            document
+                .getElementById("simEjecutante")
+                .value;
 
 
         const content =
@@ -873,7 +1063,9 @@
         ------------------------------------------------------------
         */
 
-        if (currentSim === blockedSim) {
+        if (
+            currentSim === blockedSim
+        ) {
 
             content.innerHTML = `
 
@@ -881,46 +1073,52 @@
 
                     <div
                         style="
-                        font-size:2rem;
-                        margin-bottom:8px;
+                            font-size:2rem;
+                            margin-bottom:8px;
                         "
                     >
                         🎭
                     </div>
 
+
                     <h3
                         style="
-                        margin:0 0 6px;
-                        color:var(--text-main);
+                            margin:0 0 6px;
+                            color:var(--text-main);
                         "
                     >
                         Caso en Ejecución Activa
                     </h3>
 
+
                     <p
                         style="
-                        margin:0 0 15px;
-                        font-size:0.85rem;
-                        color:var(--text-muted);
+                            margin:0 0 15px;
+                            font-size:0.85rem;
+                            color:var(--text-muted);
                         "
                     >
                         Actúas como ejecutante/paciente
-                        en la <strong>${currentSim}</strong>.
+                        en la
+                        <strong>${currentSim}</strong>.
                         No realizas auditoría en este caso.
                     </p>
+
 
                     <button
                         class="btn-primary"
                         onclick="nextSim()"
                     >
-                        Ir a la SIM de Auditoría →
+                        Ir a la Siguiente SIM →
                     </button>
 
                 </div>
 
             `;
 
+
             return;
+
         }
 
 
@@ -930,15 +1128,19 @@
         ------------------------------------------------------------
         */
 
+        const d =
+            simData[currentSim];
+
+
         let html = `
 
             <h3
                 style="
-                margin-top:0;
-                color:var(--primary-dark);
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
+                    margin-top:0;
+                    color:var(--primary-dark);
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
                 "
             >
 
@@ -946,13 +1148,14 @@
                     Evaluación ${currentSim}
                 </span>
 
+
                 <span
                     style="
-                    font-size:0.75rem;
-                    background:var(--primary-light);
-                    color:var(--primary-dark);
-                    padding:4px 8px;
-                    border-radius:12px;
+                        font-size:0.75rem;
+                        background:var(--primary-light);
+                        color:var(--primary-dark);
+                        padding:4px 8px;
+                        border-radius:12px;
                     "
                 >
                     Rol: Observador
@@ -971,14 +1174,14 @@
 
         criteria.forEach(item => {
 
-            const opts =
+            const options =
                 item.isDec
                     ? ["C", "V", "Q", "D"]
                     : ["✓", "X", "O"];
 
 
-            const currentVal =
-                simData[currentSim][item.id];
+            const currentValue =
+                d[item.id];
 
 
             html += `
@@ -989,69 +1192,72 @@
                         ${item.label}
                     </span>
 
+
                     <div class="btn-group">
 
                         ${
-                            opts
-                            .map(o => {
+                            options
+                                .map(option => {
 
-                                let activeClass = "";
+                                    let activeClass =
+                                        "";
 
-
-                                if (
-                                    currentVal === o
-                                ) {
 
                                     if (
-                                        o === "✓" ||
-                                        o === "C"
+                                        currentValue ===
+                                        option
                                     ) {
 
-                                        activeClass =
-                                            "sel-ok";
+                                        if (
+                                            option === "✓" ||
+                                            option === "C"
+                                        ) {
+
+                                            activeClass =
+                                                "sel-ok";
+
+                                        }
+
+                                        else if (
+                                            option === "X" ||
+                                            option === "D"
+                                        ) {
+
+                                            activeClass =
+                                                "sel-bad";
+
+                                        }
+
+                                        else {
+
+                                            activeClass =
+                                                "sel-neu";
+
+                                        }
 
                                     }
 
-                                    else if (
-                                        o === "X" ||
-                                        o === "D"
-                                    ) {
 
-                                        activeClass =
-                                            "sel-bad";
+                                    return `
 
-                                    }
+                                        <button
+                                            type="button"
+                                            class="opt-btn ${activeClass}"
+                                            onclick="
+                                                selectCriterion(
+                                                    '${currentSim}',
+                                                    '${item.id}',
+                                                    '${option}'
+                                                )
+                                            "
+                                        >
+                                            ${option}
+                                        </button>
 
-                                    else {
+                                    `;
 
-                                        activeClass =
-                                            "sel-neu";
-
-                                    }
-
-                                }
-
-
-                                return `
-
-                                    <button
-                                        type="button"
-                                        class="opt-btn ${activeClass}"
-                                        onclick="
-                                            selectCriterion(
-                                                '${currentSim}',
-                                                '${item.id}',
-                                                '${o}'
-                                            )
-                                        "
-                                    >
-                                        ${o}
-                                    </button>
-
-                                `;
-
-                            })
-                            .join("")
+                                })
+                                .join("")
                         }
 
                     </div>
@@ -1065,7 +1271,7 @@
 
         /*
         ------------------------------------------------------------
-        HALLAZGO
+        HALLAZGO PRINCIPAL
         ------------------------------------------------------------
         */
 
@@ -1083,15 +1289,15 @@
                     Aspecto Crítico (${currentSim}):
                 </label>
 
+
                 <textarea
                     id="hallazgoInput"
                     rows="2"
-                    placeholder="
-                        Escriba la observación clave
-                        de este caso...
-                    "
+                    placeholder="Escriba la observación clave de este caso..."
                     oninput="saveCurrentHallazgo()"
-                >${simData[currentSim].hallazgo || ""}</textarea>
+                >${escapeHtml(
+                    d.hallazgo || ""
+                )}</textarea>
 
             </div>
 
@@ -1100,13 +1306,32 @@
                 class="btn-primary"
                 onclick="nextSim()"
             >
-                Guardar y Continuar →
+                Guardar y Siguiente SIM →
             </button>
 
         `;
 
 
-        content.innerHTML = html;
+        content.innerHTML =
+            html;
+
+    }
+
+
+    /*
+    ================================================================
+    ESCAPAR TEXTO PARA HTML
+    ================================================================
+    */
+
+    function escapeHtml(text) {
+
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
     }
 
@@ -1119,20 +1344,24 @@
 
     function selectCriterion(
         sim,
-        critId,
+        criterionId,
         value
     ) {
 
         saveCurrentHallazgo();
 
-        simData[sim][critId] =
+
+        simData[sim][criterionId] =
             value;
+
 
         loadSimCard(
             activeSimIndex
         );
 
+
         renderTabs();
+
 
         checkCompletion();
 
@@ -1152,16 +1381,38 @@
 
         if (
             activeSimIndex <
-            testSims.length - 1
+            simsList.length - 1
         ) {
 
             activeSimIndex++;
 
+
             renderTabs();
+
 
             loadSimCard(
                 activeSimIndex
             );
+
+
+            checkCompletion();
+
+        }
+
+        else {
+
+            /*
+            Si estamos en la última SIM,
+            volvemos a la primera.
+            */
+
+            activeSimIndex = 0;
+
+            renderTabs();
+
+            loadSimCard(0);
+
+            checkCompletion();
 
         }
 
@@ -1170,27 +1421,43 @@
 
     /*
     ================================================================
-    COMPROBAR COMPLETITUD
+    COMPROBAR TODAS LAS SIM
     ================================================================
     */
 
     function checkCompletion() {
 
         const blockedSim =
-            document.getElementById(
-                "simEjecutante"
-            ).value;
+            document
+                .getElementById("simEjecutante")
+                .value;
 
 
         let allCompleted = true;
 
+        let completedCount = 0;
 
-        testSims.forEach(sim => {
+
+        simsList.forEach(sim => {
 
             if (
-                sim !== blockedSim &&
-                !isSimComplete(sim)
+                sim === blockedSim
             ) {
+
+                return;
+
+            }
+
+
+            if (
+                isSimComplete(sim)
+            ) {
+
+                completedCount++;
+
+            }
+
+            else {
 
                 allCompleted = false;
 
@@ -1204,18 +1471,28 @@
                 "btnFinalSubmit"
             );
 
+
         const statusMsg =
             document.getElementById(
                 "submitStatus"
             );
 
 
-        if (allCompleted) {
+        const totalAuditar =
+            simsList.length - 1;
 
-            btnSubmit.disabled = false;
+
+        if (
+            allCompleted
+        ) {
+
+            btnSubmit.disabled =
+                false;
+
 
             statusMsg.innerText =
-                "✅ SIM de auditoría completa. Puedes realizar el envío.";
+                "✅ Las 8 SIM auditables están completas. Puedes realizar el envío.";
+
 
             statusMsg.style.color =
                 "var(--success)";
@@ -1224,15 +1501,21 @@
 
         else {
 
-            btnSubmit.disabled = true;
+            btnSubmit.disabled =
+                true;
+
 
             statusMsg.innerText =
-                "⚠️ Completa todos los criterios de la SIM auditada.";
+                `⚠️ Has completado ${completedCount} de ${totalAuditar} SIM auditables.`;
+
 
             statusMsg.style.color =
                 "var(--text-muted)";
 
         }
+
+
+        actualizarProgreso();
 
     }
 
@@ -1246,48 +1529,52 @@
     function construirFilasParaEnviar() {
 
         const blockedSim =
-            document.getElementById(
-                "simEjecutante"
-            ).value;
+            document
+                .getElementById("simEjecutante")
+                .value;
 
 
         const estudiante =
-            document.getElementById(
-                "estudiante"
-            ).value || "";
+            document
+                .getElementById("estudiante")
+                .value
+                .trim();
 
 
         const documento =
-            document.getElementById(
-                "documento"
-            ).value || "";
+            document
+                .getElementById("documento")
+                .value
+                .trim();
 
 
         const grupo =
-            document.getElementById(
-                "grupo"
-            ).value || "";
+            document
+                .getElementById("grupo")
+                .value
+                .trim();
 
 
         const docente =
-            document.getElementById(
-                "docente"
-            ).value || "";
+            document
+                .getElementById("docente")
+                .value
+                .trim();
 
 
         const rolInicial =
-            document.getElementById(
-                "rolInicial"
-            ).value || "";
+            document
+                .getElementById("rolInicial")
+                .value;
 
 
         const filasParaEnviar = [];
 
 
         /*
-        ------------------------------------------------------------
+        ============================================================
         FILA DE LA SIM EJECUTANTE
-        ------------------------------------------------------------
+        ============================================================
         */
 
         filasParaEnviar.push([
@@ -1330,24 +1617,24 @@
 
 
         /*
-        ------------------------------------------------------------
-        FILA DE LA SIM AUDITADA
-        ------------------------------------------------------------
+        ============================================================
+        FILAS DE LAS 8 SIM AUDITADAS
+        ============================================================
         */
 
-        const auditSim =
-            testSims.find(
-                sim => sim !== blockedSim
-            );
+        simsList.forEach(sim => {
 
+            if (
+                sim === blockedSim
+            ) {
 
-        if (
-            auditSim &&
-            isSimComplete(auditSim)
-        ) {
+                return;
+
+            }
+
 
             const d =
-                simData[auditSim];
+                simData[sim];
 
 
             filasParaEnviar.push([
@@ -1362,7 +1649,7 @@
 
                 rolInicial,
 
-                auditSim,
+                sim,
 
                 d.I || "",
 
@@ -1388,7 +1675,7 @@
 
             ]);
 
-        }
+        });
 
 
         return filasParaEnviar;
@@ -1398,7 +1685,100 @@
 
     /*
     ================================================================
-    ENVIAR AUDITORÍA
+    VALIDAR INTEGRIDAD DE LAS FILAS
+    ================================================================
+    */
+
+    function validarFilasParaEnviar(
+        filas
+    ) {
+
+        /*
+        Cada fila debe tener exactamente
+        17 valores antes de que Apps Script
+        agregue el timestamp.
+        */
+
+        const COLUMNAS_ESPERADAS =
+            17;
+
+
+        if (
+            filas.length !== 9
+        ) {
+
+            return {
+
+                valido: false,
+
+                mensaje:
+                    `Se esperaban 9 filas, pero se construyeron ${filas.length}.`
+
+            };
+
+        }
+
+
+        for (
+            let i = 0;
+            i < filas.length;
+            i++
+        ) {
+
+            const fila =
+                filas[i];
+
+
+            if (
+                !Array.isArray(fila)
+            ) {
+
+                return {
+
+                    valido: false,
+
+                    mensaje:
+                        `La fila ${i + 1} no es un arreglo válido.`
+
+                };
+
+            }
+
+
+            if (
+                fila.length !==
+                COLUMNAS_ESPERADAS
+            ) {
+
+                return {
+
+                    valido: false,
+
+                    mensaje:
+                        `La fila ${i + 1} tiene ${fila.length} columnas. Se esperaban ${COLUMNAS_ESPERADAS}.`
+
+                };
+
+            }
+
+        }
+
+
+        return {
+
+            valido: true,
+
+            mensaje:
+                "Todas las filas tienen la estructura correcta."
+
+        };
+
+    }
+
+
+    /*
+    ================================================================
+    ENVIAR AUDITORÍA COMPLETA
     ================================================================
     */
 
@@ -1407,21 +1787,56 @@
         saveCurrentHallazgo();
 
 
-        const btn =
-            document.getElementById(
-                "btnFinalSubmit"
+        /*
+        ------------------------------------------------------------
+        Verificar nuevamente que las 8 SIM estén completas.
+        ------------------------------------------------------------
+        */
+
+        checkCompletion();
+
+
+        const blockedSim =
+            document
+                .getElementById("simEjecutante")
+                .value;
+
+
+        let incompletas = [];
+
+
+        simsList.forEach(sim => {
+
+            if (
+                sim !== blockedSim &&
+                !isSimComplete(sim)
+            ) {
+
+                incompletas.push(sim);
+
+            }
+
+        });
+
+
+        if (
+            incompletas.length > 0
+        ) {
+
+            alert(
+                "No se puede enviar.\n\n" +
+                "SIM pendientes:\n" +
+                incompletas.join(", ")
             );
 
+            return;
 
-        btn.disabled = true;
-
-        btn.innerText =
-            "Enviando registros a Google Sheets...";
+        }
 
 
         /*
         ------------------------------------------------------------
-        CONSTRUIR FILAS
+        Construir filas.
         ------------------------------------------------------------
         */
 
@@ -1430,73 +1845,77 @@
 
 
         /*
-        ============================================================
-        DIAGNÓSTICO
-        ============================================================
+        ------------------------------------------------------------
+        Validar estructura.
+        ------------------------------------------------------------
         */
 
-        console.clear();
+        const validacion =
+            validarFilasParaEnviar(
+                filasParaEnviar
+            );
+
+
+        if (
+            !validacion.valido
+        ) {
+
+            console.error(
+                "ERROR DE INTEGRIDAD:",
+                validacion.mensaje
+            );
+
+
+            alert(
+                "No se puede enviar la evaluación.\n\n" +
+                validacion.mensaje
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ------------------------------------------------------------
+        Mostrar información en consola.
+        ------------------------------------------------------------
+        */
 
         console.log(
-            "================================================"
+            "========================================"
         );
 
         console.log(
-            "DIAGNÓSTICO DE ENVÍO A GOOGLE SHEETS"
+            "ENVÍO DE AUDITORÍA"
         );
 
         console.log(
-            "================================================"
+            "========================================"
         );
-
 
         console.log(
             "Cantidad de filas:",
             filasParaEnviar.length
         );
 
+        console.log(
+            "Columnas por fila:",
+            filasParaEnviar.map(
+                fila => fila.length
+            )
+        );
 
-        filasParaEnviar.forEach(
-            (fila, index) => {
-
-                console.log(
-                    "--------------------------------------------"
-                );
-
-                console.log(
-                    "FILA:",
-                    index
-                );
-
-                console.log(
-                    "Cantidad de columnas:",
-                    fila.length
-                );
-
-                console.log(
-                    "Contenido de la fila:",
-                    fila
-                );
-
-                console.table(
-                    fila.map(
-                        (valor, posicion) => ({
-                            columna:
-                                posicion + 1,
-
-                            valor:
-                                valor
-                        })
-                    )
-                );
-
-            }
+        console.log(
+            "Datos preparados:",
+            filasParaEnviar
         );
 
 
         /*
         ------------------------------------------------------------
-        PAYLOAD
+        Payload final.
         ------------------------------------------------------------
         */
 
@@ -1509,76 +1928,50 @@
 
 
         console.log(
-            "================================================"
-        );
-
-        console.log(
-            "PAYLOAD COMPLETO"
-        );
-
-        console.log(
-            payload
-        );
-
-
-        console.log(
-            "JSON QUE SE ENVIARÁ:"
-        );
-
-        console.log(
+            "Payload:",
             JSON.stringify(payload)
         );
 
 
         /*
         ------------------------------------------------------------
-        Mostrar diagnóstico también en pantalla
+        Deshabilitar botón.
         ------------------------------------------------------------
         */
 
-        const debugBox =
+        const btn =
             document.getElementById(
-                "debugBox"
+                "btnFinalSubmit"
             );
 
 
-        debugBox.innerText =
-            "DIAGNÓSTICO\n\n" +
+        btn.disabled =
+            true;
 
-            "Filas: " +
-            filasParaEnviar.length +
 
-            "\n\n" +
-
-            filasParaEnviar
-                .map(
-                    (fila, i) =>
-                        "Fila " +
-                        i +
-                        " → " +
-                        fila.length +
-                        " columnas\n" +
-                        JSON.stringify(fila)
-                )
-                .join("\n\n");
+        btn.innerText =
+            "Enviando registros a Google Sheets...";
 
 
         /*
         ============================================================
-        ENVÍO
+        ENVÍO A GOOGLE APPS SCRIPT
         ============================================================
         */
 
         fetch(
             SCRIPT_URL,
             {
+
                 method: "POST",
 
                 mode: "no-cors",
 
                 headers: {
+
                     "Content-Type":
                         "text/plain;charset=utf-8"
+
                 },
 
                 body:
@@ -1590,7 +1983,7 @@
         .then(() => {
 
             console.log(
-                "Petición enviada al Apps Script."
+                "Datos enviados correctamente al endpoint."
             );
 
 
@@ -1605,23 +1998,25 @@
 
         })
 
-        .catch(err => {
+        .catch(error => {
 
             console.error(
-                "ERROR DE ENVÍO:",
-                err
+                "Error durante el envío:",
+                error
             );
 
 
             alert(
-                "Error al enviar los datos. Reintente por favor."
+                "Se produjo un error durante el envío. Reintente."
             );
 
 
-            btn.disabled = false;
+            btn.disabled =
+                false;
+
 
             btn.innerText =
-                "💾 Enviar Evaluación a Google Sheets";
+                "💾 Enviar Evaluación Completa a Google Sheets";
 
         });
 
